@@ -148,10 +148,10 @@ export default function DataTeamPage() {
       const result = await res.json();
 
       if (res.ok) {
-        alert("✅ Request training berhasil dikirim ke tim QA!");
+        alert("✅ Request verifikasi & training berhasil dikirim ke tim QA!");
         fetchDataTeams();
       } else {
-        alert("❌ " + (result.error || "Gagal mengajukan training"));
+        alert("❌ " + (result.error || "Gagal mengajukan verifikasi & training"));
       }
     } catch (err) {
       console.error("Request training error:", err);
@@ -654,12 +654,12 @@ export default function DataTeamPage() {
       </Modal>
 
       {/* Request Training Confirmation Modal */}
-      <Modal isOpen={confirmTarget !== null} onClose={() => setConfirmTarget(null)} title="Konfirmasi Request Training">
+      <Modal isOpen={confirmTarget !== null} onClose={() => setConfirmTarget(null)} title="Konfirmasi Request Verifikasi & Training">
          <div className="space-y-6">
             <div className="bg-orange-50 border border-orange-100 p-5 rounded-2xl">
                <p className="text-xs text-orange-700 leading-relaxed font-medium mb-4">
-                  Anda akan mengajukan training untuk seluruh tim yang ada di bawah penugasan ini. 
-                  Pastikan seluruh data personil sudah diverifikasi. 
+                  Anda akan mengajukan verifikasi data dan training untuk seluruh tim yang ada di bawah penugasan ini. 
+                  Sistem akan otomatis mendeteksi personil lama yang sudah tersertifikasi. 
                </p>
                <div className="space-y-2">
                   <div className="flex justify-between text-[10px] font-black uppercase text-alita-gray-400">

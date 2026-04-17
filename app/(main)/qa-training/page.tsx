@@ -485,7 +485,7 @@ export default function QaTrainingPage() {
                     TIM #{selectedTask.teamNumber} • Leader: {selectedTask.leaderName}
                   </div>
                   <div className="space-y-0.5">
-                    {selectedTask.members?.map((m: any) => (
+                    {selectedTask.members?.filter((m: any) => m.isAttendedTraining === 0).map((m: any) => (
                       <div key={m.id} className="flex items-center gap-3 py-2 px-1 hover:bg-alita-gray-50 rounded-lg transition-colors group">
                         <div className="relative flex items-center">
                           <input 
@@ -503,6 +503,11 @@ export default function QaTrainingPage() {
                         </label>
                       </div>
                     ))}
+                    {selectedTask.members?.filter((m: any) => m.isAttendedTraining === 1).length > 0 && (
+                      <div className="pt-2 mt-2 border-t border-alita-gray-100 italic text-[9px] text-alita-gray-400 font-medium">
+                        * {selectedTask.members?.filter((m: any) => m.isAttendedTraining === 1).length} personil lama (certified) disembunyikan dari daftar absensi.
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

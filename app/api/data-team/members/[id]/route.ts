@@ -4,6 +4,7 @@ import { teamMembers, teams } from "../../../../../db/schema";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../auth/[...nextauth]/route";
 import { eq } from "drizzle-orm";
+import { recalculateTeamStatus, recalculateAssignmentStatus, recalculateRequestStatus } from "../../../../../db/status-utils";
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -14,40 +15,48 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     const memberId = id;
     if (!memberId) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
 
-    // Fetch member to check certification status
+    // 1. Fetch member and associated team info for sync
     const member = await db.query.teamMembers.findFirst({
       where: eq(teamMembers.id, memberId),
+      with: {
+        team: {
+            with: {
+                dataTeamPartner: true
+            }
+        }
+      }
     });
 
     if (!member) return NextResponse.json({ error: "Member not found" }, { status: 404 });
 
-    // Conditional Delete Logic
-    if (member.certificateFilePath) {
-      // If already certified, just deactivate
-      await db.update(teamMembers)
-        .set({ isActive: 0 })
-        .where(eq(teamMembers.id, memberId));
-      
-      return NextResponse.json({ message: "Member deactivated (certified records preserved)." });
-    } else {
-      // If not certified, hard delete
-      await db.delete(teamMembers).where(eq(teamMembers.id, memberId));
-    }
+    // 2. TRANSACTIONAL DELETE & SYNC
+    await db.transaction(async (tx) => {
+        // a. Conditional Delete/Deactivate
+        if (member.certificateFilePath) {
+          await tx.update(teamMembers)
+            .set({ isActive: 0 })
+            .where(eq(teamMembers.id, memberId));
+        } else {
+          await tx.delete(teamMembers).where(eq(teamMembers.id, memberId));
+        }
 
-    // SYNC: If the removed member was a leader, clear the teams table fields
-    if (member.position === "Leader") {
-      await db.update(teams)
-        .set({ 
-          leaderName: "", 
-          leaderPhone: "" 
-        })
-        .where(eq(teams.id, member.teamId));
-    }
+        // b. Leader Sync
+        if (member.position === "Leader") {
+            await tx.update(teams)
+              .set({ leaderName: "", leaderPhone: "" })
+              .where(eq(teams.id, member.teamId));
+        }
 
-    return NextResponse.json({ message: "Member removal processed successfully." });
+        // c. STATUS SYNC (Cascading Update / Downgrade)
+        await recalculateTeamStatus(tx, member.teamId);
+        await recalculateAssignmentStatus(tx, member.team.dataTeamPartnerId);
+        await recalculateRequestStatus(tx, member.team.dataTeamPartner.requestId);
+    });
+
+    return NextResponse.json({ message: "Member removal processed and status synchronized successfully." });
 
   } catch (error: any) {
     console.error("Delete member error:", error);
-    return NextResponse.json({ error: "Failed to process member removal" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to process member removal: " + error.message }, { status: 500 });
   }
 }

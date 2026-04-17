@@ -295,16 +295,18 @@ export default function CertificatesPage() {
                                  <span className="text-[11px] font-bold text-alita-black leading-none">{m.name}</span>
                                  <span className="text-[8px] font-black text-alita-gray-400 tracking-widest uppercase mt-0.5">{m.position}</span>
                                </div>
-                               <button 
-                                 className={`px-3 py-1 text-[9px] font-black tracking-widest uppercase rounded shadow-sm active:scale-95 transition-all border ${
-                                   m.certificateFilePath 
-                                     ? "bg-alita-white text-alita-gray-600 border-alita-gray-200 hover:bg-alita-gray-50" 
-                                     : "bg-alita-black text-alita-white border-alita-black hover:bg-alita-gray-800"
-                                 }`} 
-                                 onClick={() => handleOpenIssuance(assignment, m)}
-                               >
-                                 {m.certificateFilePath ? "EDIT ACCESS" : "ISSUE ACCESS"}
-                               </button>
+                               {m.certificateFilePath || m.alitaExtEmail ? (
+                                 <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-100 rounded text-[9px] font-black tracking-widest uppercase shadow-sm">
+                                   ALREADY CERTIFIED / ACTIVE
+                                 </span>
+                               ) : (
+                                 <button 
+                                   className="px-3 py-1 text-[9px] font-black tracking-widest uppercase rounded shadow-sm active:scale-95 transition-all border bg-alita-black text-alita-white border-alita-black hover:bg-alita-gray-800"
+                                   onClick={() => handleOpenIssuance(assignment, m)}
+                                 >
+                                   ISSUE ACCESS
+                                 </button>
+                               )}
                              </div>
                           ))}
                         </div>

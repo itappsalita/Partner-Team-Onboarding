@@ -7,6 +7,7 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 import fs from "fs-extra";
 import { eq, and } from "drizzle-orm";
 import { generateUuid } from "../../../../lib/uuid";
+import { recalculateTeamStatus, recalculateAssignmentStatus, recalculateRequestStatus } from "../../../../db/status-utils";
 
 const UPLOAD_DIR = join(process.cwd(), "public/uploads");
 
@@ -161,6 +162,11 @@ export async function POST(req: Request) {
               })
               .where(eq(teams.id, teamId));
         }
+
+        // 6. SYNC STATUS (Cascading Update)
+        await recalculateTeamStatus(tx, teamId);
+        await recalculateAssignmentStatus(tx, currentTeam.dataTeamPartnerId);
+        await recalculateRequestStatus(tx, currentTeam.dataTeamPartner.requestId);
 
         return { id: memberId, displayId };
     });

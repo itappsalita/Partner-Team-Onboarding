@@ -423,6 +423,13 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
                                  <span className={`w-1.5 h-1.5 rounded-full ${m.isAttendedTraining === 1 ? 'bg-green-600' : 'bg-red-600'}`}></span>
                                  {m.isAttendedTraining === 1 ? 'Trained' : 'Untrained'}
                                </div>
+                               {m.isAttendedTraining === 1 && (
+                                 <div className="mt-1">
+                                   <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-[4px] text-[8px] font-black uppercase tracking-tighter border border-orange-200">
+                                     RETURNING PERSONNEL
+                                   </span>
+                                 </div>
+                               )}
                              </td>
                              <td className="px-5 py-5 min-w-[200px]">
                                {(m.alitaExtEmail || m.certificateFilePath) ? (
