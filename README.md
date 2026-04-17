@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Partner Team Onboarding System
 
-## Getting Started
+Sistem Manajemen Onboarding Partner untuk **PT. Alita Praya Mitra**. Aplikasi ini dirancang untuk memfasilitasi proses pendaftaran, verifikasi, pelatihan, hingga penerbitan sertifikat bagi personil dari perusahaan partner secara digital dan terintegrasi.
 
-First, run the development server:
+## 🚀 Fitur Utama
 
+- **Manajemen Request For Partner (RFP)**: Pembuatan permintaan kebutuhan personil oleh PMO Ops berdasarkan area dan spesialisasi.
+- **Pendaftaran Tim & Personil**: Penginputan data tim oleh Admin Partner dengan fitur validasi otomatis.
+- **Smart OCR Integration**: Ekstraksi data KTP secara otomatis menggunakan AI untuk mempercepat proses input dan verifikasi identitas.
+- **Evaluasi QA & Training**: Manajemen jadwal pelatihan dan penilaian kelayakan personil oleh tim QA.
+- **Penerbitan Sertifikat Otomatis**: Pembuatan sertifikat kompetensi berbasis template docx secara instan bagi personil yang lulus evaluasi.
+- **Dashboard Eksekutif**: Ringkasan statistik pendaftaran dan status onboarding secara real-time.
+
+## 🛠️ Tumpukan Teknologi
+
+- **Framework**: [Next.js 15+](https://nextjs.org/) (App Router & Turbopack)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
+- **Database**: [MySQL](https://www.mysql.com/)
+- **Autentikasi**: [NextAuth.js](https://next-auth.js.org/)
+- **Bahasa**: [TypeScript](https://www.typescriptlang.org/)
+
+## 📦 Panduan Instalasi
+
+### 1. Prasyarat
+Pastikan Anda telah menginstal:
+- Node.js v18.x atau lebih baru
+- MySQL Server (versi 8.0 direkomendasikan)
+- npm atau yarn
+
+### 2. Kloning Repositori
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/itappsalita/Partner-Team-Onboarding.git
+cd Partner-Team-Onboarding
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Instalasi Dependensi
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Konfigurasi Variabel Lingkungan
+Buat file bernama `.env` di direktori root dan sesuaikan konfigurasinya:
+```env
+DATABASE_URL='mysql://user:password@localhost:3306/db_onboarding'
+NEXTAUTH_URL='http://localhost:3000'
+NEXTAUTH_SECRET='buat-kunci-acak-anda-disini'
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 5. Setup Database
+Sinkronkan skema database menggunakan Drizzle:
+```bash
+npx drizzle-kit push
+```
 
-## Learn More
+### 6. Menjalankan Aplikasi
+```bash
+npm run dev
+```
+Buka [http://localhost:3000](http://localhost:3000) pada browser Anda.
 
-To learn more about Next.js, take a look at the following resources:
+## ⚠️ Catatan Penting
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Arsitektur Identitas**: Aplikasi ini menggunakan kombinasi **UUID v7** untuk kunci internal (mendukung performa indexing tinggi) dan **Display ID** (seperti `USR-00001`, `REQ-00001`) untuk navigasi pengguna yang human-readable.
+- **Penyimpanan Media**: Seluruh file yang diunggah (KTP, Selfie, Sertifikat) disimpan di direktori `public/uploads/`. Pastikan direktori ini memiliki izin tulis (*write permission*).
+- **Keamanan**: Password dienkripsi menggunakan `bcrypt` versi 10 putaran. Semua rute dilindungi oleh sesi autentikasi berdasarkan peran (*role-based access control*).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+© 2026 PT. Alita Praya Mitra. Developed for internal onboarding efficiency.
