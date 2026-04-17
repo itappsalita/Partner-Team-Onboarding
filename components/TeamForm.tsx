@@ -77,45 +77,19 @@ export default function TeamForm({
       title={isEditMode ? "Edit Data Tim Lapangan" : "Buat Tim Lapangan Baru"}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-           <div className="md:col-span-1">
-             <label className="block text-xs font-black text-alita-gray-400 uppercase tracking-[0.1em] mb-2">No Tim</label>
-             <input type="number" className="w-full px-4 py-3 bg-alita-gray-50 border border-alita-gray-200 rounded-xl text-sm font-bold disabled:opacity-50" value={formData.teamNumber} onChange={e => setFormData({...formData, teamNumber: e.target.value})} required disabled={isEditMode} />
-           </div>
-            <div className="md:col-span-3">
-              <label className="block text-xs font-black text-alita-gray-400 uppercase tracking-[0.1em] mb-2">Nama Team Leader</label>
-              <input 
-                type="text" 
-                className="w-full px-4 py-3 bg-alita-gray-100 border border-alita-gray-200 rounded-xl text-sm font-bold text-alita-gray-500 cursor-not-allowed" 
-                value={formData.leaderName || ""} 
-                readOnly 
-                placeholder="Otomatis dari Anggota (Role Leader)" 
-                title="Data ini diambil otomatis dari anggota tim yang memiliki jabatan Leader"
-              />
-            </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Static Header Info (Read-only reference) */}
+        <div className="bg-alita-black text-alita-white p-5 rounded-2xl flex items-center justify-between shadow-xl animate-in slide-in-from-top-4 duration-500">
           <div>
-            <label className="block text-xs font-black text-alita-gray-400 uppercase tracking-[0.1em] mb-2">No Handphone Leader</label>
-            <input 
-              type="text" 
-              className="w-full px-4 py-3 bg-alita-gray-100 border border-alita-gray-200 rounded-xl text-sm font-bold text-alita-gray-500 cursor-not-allowed" 
-              value={formData.leaderPhone || ""} 
-              readOnly 
-              placeholder="Otomatis dari Anggota (Role Leader)" 
-              title="Data ini diambil otomatis dari anggota tim yang memiliki jabatan Leader"
-            />
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-alita-orange mb-1">DATA IDENTITAS TIM</p>
+            <h3 className="text-xl font-black tracking-tight flex items-center gap-2">
+              Tim Lapangan #{formData.teamNumber}
+              <span className="text-[10px] px-2 py-0.5 bg-alita-orange/20 text-alita-orange rounded border border-alita-orange/30">ACTIVE</span>
+            </h3>
           </div>
-          <div>
-            <label className="block text-xs font-black text-alita-gray-400 uppercase tracking-[0.1em] mb-2">Posisi</label>
-            <input type="text" className="w-full px-4 py-3 bg-alita-100 border border-alita-gray-200 rounded-xl text-sm font-bold text-alita-gray-500 cursor-not-allowed" value={formData.position} disabled />
+          <div className="text-right">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-alita-gray-400 mb-1">LOKASI</p>
+            <p className="text-xs font-bold">{formData.location || "-"}</p>
           </div>
-        </div>
-
-        <div>
-          <label className="block text-xs font-black text-alita-gray-400 uppercase tracking-[0.1em] mb-2">Lokasi Penugasan</label>
-          <input type="text" className="w-full px-4 py-3 bg-alita-100 border border-alita-gray-200 rounded-xl text-sm font-bold text-alita-gray-500 cursor-not-allowed" value={formData.location} disabled />
         </div>
 
         <div className="border-2 border-alita-gray-50 rounded-2xl p-6 bg-alita-gray-50/30">

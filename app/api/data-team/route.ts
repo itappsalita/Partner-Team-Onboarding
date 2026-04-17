@@ -125,7 +125,8 @@ export async function POST(req: Request) {
 
     const locationPlaceholder = `${request.provinsi}, ${request.area}`;
 
-    const resultId = await db.transaction(async (tx) => {
+    // 3. TRANSACTIONAL INSERT & ID GENERATION
+    const result = await db.transaction(async (tx) => {
       // 1.5 Fetch Partner Details for Snapshot
       const partnerUser = await tx.query.users.findFirst({
         where: eq(users.id, partnerIdStr),
@@ -144,26 +145,51 @@ export async function POST(req: Request) {
         status: 'SOURCING'
       });
 
+      // 2.5 Generate Assignment displayId (ASG-XXXXX)
+      const [newAsg] = await tx.select({ seqNumber: dataTeamPartners.seqNumber })
+        .from(dataTeamPartners)
+        .where(eq(dataTeamPartners.id, assignmentId));
+      
+      const asgDisplayId = `ASG-${(newAsg?.seqNumber || 0).toString().padStart(5, '0')}`;
+      await tx.update(dataTeamPartners)
+        .set({ displayId: asgDisplayId })
+        .where(eq(dataTeamPartners.id, assignmentId));
+
       // 3. Update the request status based on fulfillment
       await recalculateRequestStatus(tx, requestId);
 
       // 4. Create Team Placeholders
       if (numTeams > 0) {
         for (let i = 1; i <= numTeams; i++) {
+          const teamId = generateUuid();
           await tx.insert(teams).values({
-            id: generateUuid(),
+            id: teamId,
             dataTeamPartnerId: assignmentId,
             teamNumber: i,
             location: locationPlaceholder,
             position: 'Team Leader' // Initial default position
           });
+
+          // Generate Team displayId (TM-XXXXX)
+          const [newTeam] = await tx.select({ seqNumber: teams.seqNumber })
+            .from(teams)
+            .where(eq(teams.id, teamId));
+          
+          const teamDisplayId = `TM-${(newTeam?.seqNumber || 0).toString().padStart(5, '0')}`;
+          await tx.update(teams)
+            .set({ displayId: teamDisplayId })
+            .where(eq(teams.id, teamId));
         }
       }
 
-      return assignmentId;
+      return { assignmentId, displayId: asgDisplayId };
     });
 
-    return NextResponse.json({ message: "Team data and placeholders created successfully", id: resultId }, { status: 201 });
+    return NextResponse.json({ 
+      message: "Team data and placeholders created successfully", 
+      id: result.assignmentId, 
+      displayId: result.displayId 
+    }, { status: 201 });
   } catch (error: any) {
     console.error("Upload error:", error);
     return NextResponse.json({ error: "Failed to process team data: " + error.message }, { status: 500 });

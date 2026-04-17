@@ -350,8 +350,8 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
                     </span>
                     <button 
                       onClick={() => setIsMemberModalOpen(true)}
-                      disabled={!activeTeam.leaderName || ((activeTeam.members?.filter((m: any) => m.isActive === 1).length || 0) >= (assignment.request?.membersPerTeam || 0))}
-                      className="px-4 lg:px-5 py-2 lg:py-2.5 bg-alita-black text-alita-white rounded-lg text-[10px] lg:text-xs font-bold hover:bg-alita-orange disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg active:scale-95"
+                      disabled={!activeTeam.tkpk1Number || !activeTeam.tkpk1FilePath || ((activeTeam.members?.filter((m: any) => m.isActive === 1).length || 0) >= (assignment.request?.membersPerTeam || 0))}
+                      className="px-4 lg:px-5 py-2 lg:py-2.5 bg-alita-black text-alita-white rounded-lg text-[10px] lg:text-xs font-bold hover:bg-alita-orange disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg active:scale-95"
                     >
                       { ((activeTeam.members?.filter((m: any) => m.isActive === 1).length || 0) >= (assignment.request?.membersPerTeam || 0)) 
                         ? "Kuota Penuh" 
@@ -362,9 +362,9 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
                 )}
               </div>
               
-              {!activeTeam.leaderName && (
-                 <div className="bg-alita-orange/5 border border-alita-orange/20 p-8 rounded-2xl text-center mb-8">
-                    <p className="text-alita-orange font-bold text-sm">Silakan lengkapi informasi Team Leader terlebih dahulu sebelum menambah anggota.</p>
+              {(!activeTeam.tkpk1Number || !activeTeam.tkpk1FilePath) && (
+                 <div className="bg-red-50 border border-red-100 p-8 rounded-2xl text-center mb-8">
+                    <p className="text-red-600 font-bold text-sm italic">⚠️ Wajib melengkapi data sertifikat TKPK1 (Nomor & Unggah File) pada menu "Edit Tim" sebelum dapat menambahkan anggota.</p>
                  </div>
               )}
 
