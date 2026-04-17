@@ -1,0 +1,102 @@
+import { NextResponse } from "next/server";
+import { db } from "../../../db";
+import { requestForPartners } from "../../../db/schema";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../auth/[...nextauth]/route";
+import { generateUuid } from "../../../lib/uuid";
+
+export async function GET(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Use relational queries to include PMO details and team counts
+    const allRequests = await db.query.requestForPartners.findMany({
+      with: {
+        pmo: {
+          columns: {
+            name: true,
+            email: true,
+          }
+        },
+        dataTeamPartners: {
+          with: {
+            teams: {
+              columns: {
+                id: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: (requests, { desc }) => [desc(requests.createdAt)],
+    });
+
+    // Calculate totalRegisteredTeams for each request (excluding CANCELED assignments)
+    const requestsWithTotals = allRequests.map(req => {
+      const activeAssignments = req.dataTeamPartners.filter(dt => dt.status !== 'CANCELED');
+      const totalRegisteredTeams = activeAssignments.reduce((acc, dt) => acc + dt.teams.length, 0);
+      // Remove dataTeamPartners from the response
+      const { dataTeamPartners: _, ...rest } = req;
+      return { 
+        ...rest, 
+        totalRegisteredTeams 
+      };
+    });
+
+    return NextResponse.json(requestsWithTotals);
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to fetch requests" }, { status: 500 });
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const role = (session.user as any).role;
+    if (role !== "PMO_OPS" && role !== "SUPERADMIN") {
+      return NextResponse.json({ error: "Unauthorized. PMO Ops or Superadmin only." }, { status: 403 });
+    }
+
+    const body = await req.json();
+    const { sowPekerjaan, provinsi, area, jumlahKebutuhan, membersPerTeam, siteId } = body;
+
+    if (!sowPekerjaan || !provinsi || !area || !jumlahKebutuhan || !membersPerTeam) {
+      return NextResponse.json({ error: "Missing required fields (including membersPerTeam)" }, { status: 400 });
+    }
+
+    const requestId = generateUuid();
+    await db.insert(requestForPartners).values({
+      id: requestId,
+      pmoId: (session.user as any).id,
+      sowPekerjaan,
+      provinsi,
+      area,
+      jumlahKebutuhan: parseInt(jumlahKebutuhan),
+      membersPerTeam: parseInt(membersPerTeam),
+      siteId,
+      status: 'REQUESTED'
+    });
+
+    // Fetch the generated seq_number to create displayId
+    const [newReq] = await db.select({ seqNumber: requestForPartners.seqNumber })
+      .from(requestForPartners)
+      .where(eq(requestForPartners.id, requestId));
+    
+    const displayId = `REQ-${newReq.seqNumber.toString().padStart(5, '0')}`;
+    
+    await db.update(requestForPartners)
+      .set({ displayId })
+      .where(eq(requestForPartners.id, requestId));
+
+    return NextResponse.json({ message: "Request created successfully", id: requestId, displayId }, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json({ error: "Failed to create request" }, { status: 500 });
+  }
+}
