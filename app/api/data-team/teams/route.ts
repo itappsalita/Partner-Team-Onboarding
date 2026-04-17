@@ -153,7 +153,7 @@ export async function POST(req: Request) {
       .from(teams)
       .where(eq(teams.id, teamId));
     
-    const displayId = `TM-${newTeam.seqNumber.toString().padStart(5, '0')}`;
+    const displayId = `TM-${(newTeam?.seqNumber || 0).toString().padStart(5, '0')}`;
     
     await db.update(teams)
       .set({ displayId })
