@@ -40,6 +40,10 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
   const [isEditMode, setIsEditMode] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Member Edit State
+  const [editingMember, setEditingMember] = useState<any>(null);
+  const [editForm, setEditForm] = useState({ position: '', selfieFile: null as File | null });
+
   const fetchTeams = async () => {
     setLoading(true);
     try {
@@ -56,6 +60,37 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
       console.error("Fetch teams error:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveEditMember = async () => {
+    if (!editingMember) return;
+    setSubmitting(true);
+    try {
+        const formData = new FormData();
+        formData.append("position", editForm.position);
+        if (editForm.selfieFile) {
+            formData.append("selfieFile", editForm.selfieFile);
+        }
+
+        const res = await fetch(`/api/data-team/members/${editingMember.id}`, {
+            method: "PUT",
+            body: formData
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+            alert("✅ Data anggota berhasil diperbarui!");
+            setEditingMember(null);
+            fetchTeams();
+        } else {
+            alert("❌ " + (result.error || "Gagal memperbarui data"));
+        }
+    } catch (err) {
+        console.error("Update member error:", err);
+        alert("❌ Terjadi kesalahan sistem saat memperbarui data");
+    } finally {
+        setSubmitting(false);
     }
   };
 
@@ -480,30 +515,45 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
                              </td>
                            {(!isCanceled && (isPartner || isSuperAdmin)) && (
                              <td className="px-5 py-5 text-center">
-                               {(!m.certificateFilePath && !isStructuralReadOnly) || (m.certificateFilePath) ? (
-                                 <button 
-                                   onClick={() => handleDeleteMember(m.id, !!m.certificateFilePath)}
-                                   className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg font-black text-[8px] uppercase tracking-tighter transition-all shadow-sm active:scale-95 mx-auto ${
-                                     m.certificateFilePath 
-                                       ? 'bg-alita-gray-50 text-alita-gray-400 hover:bg-alita-gray-100' 
-                                       : 'bg-red-50 text-red-500 border border-red-50 hover:bg-red-100'
-                                   }`}
-                                 >
-                                   {m.certificateFilePath ? (
-                                     <>
-                                       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
-                                       <span>Deactivate</span>
-                                     </>
-                                   ) : (
-                                     <>
-                                       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                                       <span>Delete</span>
-                                     </>
-                                   )}
-                                 </button>
-                               ) : (
-                                 <span className="text-[8px] font-black text-alita-gray-300 uppercase">Locked</span>
-                               )}
+                               <div className="flex items-center justify-center gap-2">
+                                 {activeTeam.status === 'SOURCING' && (isPartner || isSuperAdmin) && (
+                                   <button 
+                                     onClick={() => {
+                                       setEditingMember(m);
+                                       setEditForm({ position: m.position, selfieFile: null });
+                                     }}
+                                     className="flex flex-col items-center gap-1 px-2 py-2 rounded-lg font-black text-[8px] uppercase tracking-tighter transition-all shadow-sm active:scale-95 bg-alita-black text-alita-white hover:bg-alita-gray-800"
+                                   >
+                                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                     <span>Edit</span>
+                                   </button>
+                                 )}
+                                 
+                                 {((!m.certificateFilePath && !isStructuralReadOnly) || (m.certificateFilePath)) ? (
+                                   <button 
+                                     onClick={() => handleDeleteMember(m.id, !!m.certificateFilePath)}
+                                     className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg font-black text-[8px] uppercase tracking-tighter transition-all shadow-sm active:scale-95 ${
+                                       m.certificateFilePath 
+                                         ? 'bg-alita-gray-50 text-alita-gray-400 hover:bg-alita-gray-100' 
+                                         : 'bg-red-50 text-red-500 border border-red-50 hover:bg-red-100'
+                                     }`}
+                                   >
+                                     {m.certificateFilePath ? (
+                                       <>
+                                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+                                         <span>Deactivate</span>
+                                       </>
+                                     ) : (
+                                       <>
+                                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                         <span>Delete</span>
+                                       </>
+                                     )}
+                                   </button>
+                                 ) : (
+                                   <span className="text-[8px] font-black text-alita-gray-300 uppercase">Locked</span>
+                                 )}
+                               </div>
                              </td>
                            )}
                            </tr>
@@ -567,6 +617,84 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
           isStructuralReadOnly={isStructuralReadOnly}
         />
       )}
+      {/* Edit Member Modal */}
+      <Modal isOpen={editingMember !== null} onClose={() => setEditingMember(null)} title="Edit Data Anggota">
+        <div className="space-y-6">
+          <div className="bg-alita-gray-50 border border-alita-gray-100 p-4 rounded-xl">
+             <div className="text-[10px] font-black uppercase text-alita-gray-400 tracking-widest mb-1">Nama Anggota</div>
+             <div className="text-sm font-bold text-alita-black">{editingMember?.name}</div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-alita-gray-400 mb-2">Pilih Jabatan</label>
+              <div className="grid grid-cols-2 gap-3">
+                {['Leader', 'Technician', 'Helper', 'Driver'].map((role) => (
+                  <button
+                    key={role}
+                    type="button"
+                    onClick={() => setEditForm(prev => ({ ...prev, position: role }))}
+                    className={`py-3 px-4 rounded-xl border-2 text-[10px] font-bold transition-all uppercase tracking-tighter ${
+                      editForm.position === role
+                        ? 'border-alita-orange bg-orange-50 text-alita-orange'
+                        : 'border-alita-gray-100 text-alita-gray-400 hover:border-alita-gray-200'
+                    }`}
+                  >
+                    {role}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-alita-gray-400 mb-2">Upload Foto Selfie Baru (Opsional)</label>
+              <div className="relative group">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setEditForm(prev => ({ ...prev, selfieFile: e.target.files?.[0] || null }))}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+                <div className={`p-5 border-2 border-dashed rounded-2xl transition-all flex flex-col items-center justify-center gap-3 ${
+                   editForm.selfieFile ? 'border-green-200 bg-green-50' : 'border-alita-gray-100 group-hover:border-alita-orange group-hover:bg-orange-50'
+                }`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                     editForm.selfieFile ? 'bg-green-100 text-green-600' : 'bg-alita-gray-100 text-alita-gray-400'
+                  }`}>
+                    {editForm.selfieFile ? (
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    ) : (
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    )}
+                  </div>
+                  <div className="text-center">
+                    <div className={`text-[11px] font-bold ${editForm.selfieFile ? 'text-green-700' : 'text-alita-black'}`}>
+                      {editForm.selfieFile ? editForm.selfieFile.name : 'Klik untuk ubah foto selfie'}
+                    </div>
+                    {!editForm.selfieFile && <div className="text-[9px] font-medium text-alita-gray-400 mt-1 italic tracking-tight italic">Biarkan kosong jika tidak ingin mengubah foto</div>}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-4 border-t border-alita-gray-100">
+            <button
+              onClick={() => setEditingMember(null)}
+              className="flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-alita-gray-400 hover:bg-alita-gray-50 rounded-xl transition-all"
+            >
+              Batal
+            </button>
+            <button
+              onClick={handleSaveEditMember}
+              disabled={submitting}
+              className="flex-1 py-3 bg-alita-orange text-alita-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-orange-600 shadow-lg shadow-orange-100 disabled:opacity-50 active:scale-[0.98] transition-all"
+            >
+              {submitting ? 'Menyimpan...' : 'Simpan Perubahan'}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
