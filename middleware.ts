@@ -7,9 +7,9 @@ export default withAuth(
     const path = req.nextUrl.pathname;
 
     // 1. Role-based Path Access Control
-    // Only PMO_OPS and SUPERADMIN can access user management
+    // Only PROCUREMENT and SUPERADMIN can access user management
     if (path.startsWith("/users")) {
-      if (token?.role !== "PMO_OPS" && token?.role !== "SUPERADMIN") {
+      if (token?.role !== "PROCUREMENT" && token?.role !== "SUPERADMIN") {
         return NextResponse.redirect(new URL("/dashboard", req.url));
       }
     }
