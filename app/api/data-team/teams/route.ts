@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { generateUuid } from "../../../../lib/uuid";
 
 import fs from "fs-extra";
