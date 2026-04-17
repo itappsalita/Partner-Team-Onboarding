@@ -93,8 +93,8 @@ export async function POST(req: Request) {
     const electricalNumber = formData.get("electricalNumber") as string || null;
     const electricalFile = formData.get("electricalFile") as File | null;
 
-    if (!dataTeamPartnerId || !leaderName || !leaderPhone || !tkpk1Number) {
-      return NextResponse.json({ error: "Missing required fields (Nama, Phone, No TKPK)" }, { status: 400 });
+    if (!dataTeamPartnerId || !tkpk1Number) {
+      return NextResponse.json({ error: "Missing required fields (dataTeamPartnerId, No TKPK)" }, { status: 400 });
     }
 
     // 1. Fetch Location Automatically from Request
@@ -190,8 +190,8 @@ export async function PUT(req: Request) {
     const electricalNumber = formData.get("electricalNumber") as string || null;
     const electricalFile = formData.get("electricalFile") as File | null;
 
-    if (!id || !leaderName || !leaderPhone || !tkpk1Number || !location) {
-      return NextResponse.json({ error: "Missing required fields (Nama, Phone, Lokasi, No TKPK)" }, { status: 400 });
+    if (!id || !tkpk1Number) {
+      return NextResponse.json({ error: "Missing required fields (ID, No TKPK)" }, { status: 400 });
     }
 
     // Handle File Uploads
@@ -202,14 +202,15 @@ export async function PUT(req: Request) {
 
     // Prepare update object (only include provided fields)
     const updateData: any = {
-      leaderName,
-      leaderPhone,
       tkpk1Number,
-      position,
-      location,
       firstAidNumber,
       electricalNumber,
     };
+
+    if (leaderName) updateData.leaderName = leaderName;
+    if (leaderPhone) updateData.leaderPhone = leaderPhone;
+    if (position) updateData.position = position;
+    if (location) updateData.location = location;
 
     if (tkpk1FilePath) updateData.tkpk1FilePath = tkpk1FilePath;
     if (firstAidFilePath) updateData.firstAidFilePath = firstAidFilePath;
