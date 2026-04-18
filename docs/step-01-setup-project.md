@@ -1,43 +1,42 @@
-# Step 1: Setup Project
+# Step 1: Setup Project (ACTUAL)
 
-Dokumen ini memandu pembuatan kerangka awal proyek "Partner Team Onboarding". Ikuti setiap instruksi di bawah ini dengan tepat.
+Dokumen ini mencatat inisialisasi nyata dari proyek "Partner Team Onboarding" untuk PT. Alita Praya Mitra.
 
 ## 1. Inisialisasi Proyek Next.js
-Gunakan perintah berikut di terminal untuk membuat proyek berbasis Next.js App Router.
+Proyek dibangun menggunakan versi Next.js terbaru dengan dukungan fitur App Router.
 ```bash
 npx create-next-app@latest .
-# Konfigurasi disarankan:
-# - TypeScript: Yes
-# - ESLint: Yes
-# - Tailwind CSS: No (Kita menggunakan Vanilla CSS / CSS Modules atas instruksi desain ini)
-# - `src/` directory: No (Gunakan App Router langsung di root `/app`)
-# - App Router: Yes
-# - Customize default import alias: No
 ```
+**Konfigurasi Terpasang:**
+- **Next.js Version**: 16.2.3
+- **React Version**: 19
+- **TypeScript**: Yes
+- **ESLint**: Yes
+- **Tailwind CSS**: Yes (Versi 4.0)
+- **App Router**: Yes
+- **`src/` directory**: No (Struktur root `/app`)
 
 ## 2. Instalasi Dependencies Utama
-Sistem kita akan menggunakan Drizzle ORM, MySQL2, NextAuth, bcrypt, dll.
+Sistem menggunakan berbagai pustaka modern untuk audit, ekspor data, dan rendering dokumen.
 ```bash
-# Install Runtime Dependencies
+# Runtime Dependencies
 npm install drizzle-orm mysql2 next-auth bcrypt
-npm install formidable fs-extra # Untuk keperluan upload gambar/dokumen secara offline ke folder uploads/
+npm install exceljs puppeteer qrcode lucide-react rechart framer-motion
+npm install clsx tailwind-merge swagger-ui-react swagger-jsdoc fs-extra
 
-# Install Development Dependencies
-npm install -D drizzle-kit @types/bcrypt @types/node @types/react @types/formidable typescript
+# Development Dependencies
+npm install -D drizzle-kit @types/bcrypt @types/node @types/react @types/fs-extra typescript
 ```
 
 ## 3. Konfigurasi Lingkungan (.env)
-Bikin file `.env` di dalam folder root kerja. Isikan kredensial berikut. Perhatikan bahwa String MySQL dibutuhkan oleh Drizzle.
+File `.env` di direktori root mengelola kredensial krusial:
 ```env
-# URL Koneksi Database ke Instance MySQL (Silakan ubah user, password, host, dan nama db)
 DATABASE_URL="mysql://root:password@localhost:3306/partner_onboarding_db"
-
-# Next Auth Secret
-NEXTAUTH_SECRET="buat_string_rahasia_dan_taruh_disini_sebagai_token_auth"
+NEXTAUTH_SECRET="[TOKEN-RAHASIA-ALITA]"
 NEXTAUTH_URL="http://localhost:3000"
 ```
 
-## 4. Konfigurasi Upload Directory
-Aplikasi kita butuh tempat menyimpan file lokal (seperti file BAK, TOR, Foto KTP, dan KTP, Sertifikat).
-1. Buat direktori bernama `public/uploads` di dalam root direktori.
-2. Pastikan Next.js mengetahui bahwa lokasi `/uploads` bisa diakses secara publik, dan file konfigurasi *gitignore* telah diatur (`echo "public/uploads/*" >> .gitignore`).
+## 4. Konfigurasi Media & Persistensi
+Karena aplikasi menangani dokumen legal (KTP/Selfie/Sertifikat), direktori penyimpanan lokal telah disiapkan:
+- **Path**: `public/uploads/`
+- **Aturan Git**: File di dalam path ini dikecualikan dari repositori (`.gitignore`) untuk menjaga privasi data partner, namun dikelola melalui sistem Volume di Docker untuk persistensi data di server produksi.
