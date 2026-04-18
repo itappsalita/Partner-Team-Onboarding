@@ -19,8 +19,8 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
   
   // Structural changes (Edit Team/Add Member) are locked if Completed/Canceled
   const isStructuralReadOnly = (!isPartner && !isSuperAdmin) || 
-                               assignment.status === 'COMPLETED' || 
-                               assignment.status === 'CANCELED';
+                                assignment.status === 'COMPLETED' || 
+                                assignment.status === 'CANCELED';
                      
   const isCanceled = assignment.status === 'CANCELED';
 
@@ -49,19 +49,28 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
     try {
       const res = await fetch(`/api/data-team/teams?dataTeamPartnerId=${assignment.id}`);
       const data = await res.json();
-      setTeams(data);
-      if (data.length > 0 && !activeTeam) {
-        setActiveTeam(data[0]);
-      } else if (activeTeam) {
-        const updatedActive = data.find((t: any) => t.id === activeTeam.id);
-        if (updatedActive) setActiveTeam(updatedActive);
+      
+      // Ensure data is an array before setting state
+      if (Array.isArray(data)) {
+        setTeams(data);
+        if (data.length > 0 && !activeTeam) {
+          setActiveTeam(data[0]);
+        } else if (activeTeam) {
+          const updatedActive = data.find((t: any) => t.id === activeTeam.id);
+          if (updatedActive) setActiveTeam(updatedActive);
+        }
+      } else {
+        console.error("API Error or Invalid format:", data);
+        setTeams([]); // Fallback to empty array
       }
     } catch (err) {
       console.error("Fetch teams error:", err);
+      setTeams([]);
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleSaveEditMember = async () => {
     if (!editingMember) return;
@@ -227,7 +236,7 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
             <h3 className="text-[9px] lg:text-[10px] font-black uppercase tracking-[0.1em] text-alita-gray-400">Daftar Tim Lapangan</h3>
           </div>
           <div className="flex-row lg:flex-col overflow-x-auto lg:overflow-y-auto px-4 pb-4 lg:pb-6 custom-scrollbar flex gap-3 lg:gap-0 lg:space-y-3">
-            {teams.map(t => (
+            {Array.isArray(teams) && teams.map(t => (
               <div 
                 key={t.id} 
                 onClick={() => setActiveTeam(t)}
@@ -438,7 +447,19 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
                              <td className="px-5 py-5 text-xs font-black text-alita-gray-400">{indexOfFirst + idx + 1}</td>
                              <td className="px-5 py-5 text-xs font-bold text-alita-gray-400">#{m.displayId}</td>
                              <td className="px-5 py-5">
-                               <div className="font-bold text-alita-black text-sm mb-1">{m.name}</div>
+                               <div className="flex items-center gap-2 mb-1">
+                                 <div className="font-bold text-alita-black text-sm">{m.name}</div>
+                                 {m.isReturning === 1 && (
+                                   <div 
+                                     title="RETURNING PERSONNEL (Certified)"
+                                     className="group relative cursor-help shrink-0"
+                                   >
+                                     <div className="flex items-center justify-center w-4 h-4 bg-orange-50 border border-orange-100 rounded-full text-alita-orange transition-all hover:bg-alita-orange hover:text-alita-white hover:scale-110 shadow-sm shadow-orange-100">
+                                       <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 15l-2 5l-4-4l-1 1l-4-4l11-13l11 13l-4 4l-1-1l-4 4l-2-5Z"></path></svg>
+                                     </div>
+                                   </div>
+                                 )}
+                               </div>
                                <div className="text-[10px] font-black text-alita-gray-400 tracking-wider">NIK: {m.nik}</div>
                              </td>
                              <td className="px-5 py-5">
@@ -452,19 +473,12 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
                                 <span className="px-2 py-1 bg-alita-gray-100 rounded text-[9px] font-black uppercase text-alita-gray-600 border border-alita-gray-200">{m.position}</span>
                              </td>
                              <td className="px-5 py-5">
-                               <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
-                                 m.isAttendedTraining === 1 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'
-                               }`}>
-                                 <span className={`w-1.5 h-1.5 rounded-full ${m.isAttendedTraining === 1 ? 'bg-green-600' : 'bg-red-600'}`}></span>
-                                 {m.isAttendedTraining === 1 ? 'Trained' : 'Untrained'}
-                               </div>
-                               {m.isAttendedTraining === 1 && (
-                                 <div className="mt-1">
-                                   <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-[4px] text-[8px] font-black uppercase tracking-tighter border border-orange-200">
-                                     RETURNING PERSONNEL
-                                   </span>
-                                 </div>
-                               )}
+                                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                                  m.isAttendedTraining === 1 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'
+                                }`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full ${m.isAttendedTraining === 1 ? 'bg-green-600' : 'bg-red-600'}`}></span>
+                                  {m.isAttendedTraining === 1 ? 'Trained' : 'Untrained'}
+                                </div>
                              </td>
                              <td className="px-5 py-5 min-w-[200px]">
                                {(m.alitaExtEmail || m.certificateFilePath) ? (

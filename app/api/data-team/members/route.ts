@@ -129,6 +129,7 @@ export async function POST(req: Request) {
         insertData.alitaExtEmail = oldMember.alitaExtEmail;
         insertData.alitaEmailPassword = oldMember.alitaEmailPassword;
         insertData.isAttendedTraining = 1; // Mark as trained
+        insertData.isReturning = 1; // Mark as veteran/returning
     }
 
     // 5. TRANSACTIONAL INSERT & ID GENERATION

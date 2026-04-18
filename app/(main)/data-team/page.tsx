@@ -53,7 +53,10 @@ export default function DataTeamPage() {
   const [isCancelSubmitting, setIsCancelSubmitting] = useState(false);
 
   const getWorstCaseStatus = (dt: any) => {
+    // If the master status from DB is already COMPLETED or CANCELED, respect it immediately
     if (dt.status === 'CANCELED') return 'CANCELED';
+    if (dt.status === 'COMPLETED') return 'COMPLETED';
+    
     if (!dt.teams || dt.teams.length === 0) return dt.status || 'SOURCING';
     
     const statuses = dt.teams.map((t: any) => t.status);

@@ -78,14 +78,19 @@ export async function recalculateAssignmentStatus(tx: any, assignmentId: string)
 
   if (!assignment) return;
 
-  // If assignment is canceled, leave it as is
-  if (assignment.status === 'CANCELED') return;
+  // If assignment is canceled or COMPLETED, leave it as is (lock status)
+  if (assignment.status === 'CANCELED' || assignment.status === 'COMPLETED') return;
 
   // 1. Get status of all teams
   const teamStatuses = assignment.teams.filter((t: any) => t.status !== 'CANCELED').map((t: any) => t.status);
   
   if (teamStatuses.length === 0) {
-    await tx.update(dataTeamPartners).set({ status: 'SOURCING' }).where(eq(dataTeamPartners.id, assignmentId));
+    await tx.update(dataTeamPartners)
+      .set({ status: 'SOURCING' })
+      .where(and(
+        eq(dataTeamPartners.id, assignmentId),
+        ne(dataTeamPartners.status, 'COMPLETED')
+      ));
     return;
   }
 
@@ -113,7 +118,10 @@ export async function recalculateAssignmentStatus(tx: any, assignmentId: string)
   if (assignment.status !== newStatus) {
     await tx.update(dataTeamPartners)
       .set({ status: newStatus })
-      .where(eq(dataTeamPartners.id, assignmentId));
+      .where(and(
+        eq(dataTeamPartners.id, assignmentId),
+        ne(dataTeamPartners.status, 'COMPLETED')
+      ));
     
     console.log(`[STATUS] Assignment #${assignmentId} updated to ${newStatus}`);
   }
@@ -124,12 +132,16 @@ export async function recalculateAssignmentStatus(tx: any, assignmentId: string)
  * "worst-case" status among all required teams.
  */
 export async function recalculateRequestStatus(tx: any, requestId: string) {
-  // 1. Get the Request Quota
+  // 1. Get the Request Quota and Current Status
   const [request] = await tx.select({ 
-    jumlahKebutuhan: requestForPartners.jumlahKebutuhan 
+    jumlahKebutuhan: requestForPartners.jumlahKebutuhan,
+    status: requestForPartners.status
   }).from(requestForPartners).where(eq(requestForPartners.id, requestId));
 
   if (!request) return;
+
+  // If request is already COMPLETED, lock it
+  if (request.status === 'COMPLETED') return;
 
   // 2. Get all ACTIVE teams currently assigned for this request
   // IMPORTANT: Exclude any CANCELED assignments or teams from the calculation
@@ -164,10 +176,13 @@ export async function recalculateRequestStatus(tx: any, requestId: string) {
   // 4. Map score back to requestStatusEnum
   const newStatus = REQUEST_STATUS_MAPPING[lowestScore] || 'REQUESTED';
 
-  // 5. Update the Request Table
+  // 5. Update the Request Table (with lock check)
   await tx.update(requestForPartners)
     .set({ status: newStatus })
-    .where(eq(requestForPartners.id, requestId));
+    .where(and(
+        eq(requestForPartners.id, requestId),
+        ne(requestForPartners.status, 'COMPLETED')
+    ));
     
   console.log(`[STATUS] Request #${requestId} recalculated to ${newStatus}`);
 }
