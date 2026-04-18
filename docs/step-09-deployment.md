@@ -1,6 +1,6 @@
 # Tutorial Deployment: Zero to Production 🚀
 
-Panduan ini dirancang khusus bagi Anda yang belum pernah melakukan deployment aplikasi ke server. Kita akan menempuh 5 langkah sederhana untuk menghidupkan aplikasi **Partner Team Onboarding**.
+Panduan ini dirancang khusus bagi Anda yang belum pernah melakukan deployment aplikasi ke server. Kita akan menempuh 6 langkah sederhana untuk menghidupkan aplikasi **Partner Team Onboarding**.
 
 ---
 
