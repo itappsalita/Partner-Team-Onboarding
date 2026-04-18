@@ -1,79 +1,79 @@
 # Partner Team Onboarding System
 
-Sistem Manajemen Onboarding Partner untuk **PT. Alita Praya Mitra**. Aplikasi ini dirancang untuk memfasilitasi proses pendaftaran, verifikasi, pelatihan, hingga penerbitan sertifikat bagi personil dari perusahaan partner secara digital dan terintegrasi.
+Sistem Manajemen Onboarding Partner untuk **PT. Alita Praya Mitra**. Aplikasi ini dirancang untuk memfasilitasi proses pendaftaran, verifikasi, pelatihan, hingga penerbitan sertifikat bagi personil dari perusahaan partner secara digital, aman, dan terintegrasi.
 
-## 🚀 Fitur Utama
+## 🚀 Fitur Utama & Keunggulan
 
-- **Manajemen Request For Partner (RFP)**: Pembuatan permintaan kebutuhan personil oleh PMO Ops berdasarkan area dan spesialisasi.
-- **Pendaftaran Tim & Personil**: Penginputan data tim oleh Admin Partner dengan fitur validasi otomatis.
-- **Smart OCR Integration**: Ekstraksi data KTP secara otomatis menggunakan AI untuk mempercepat proses input dan verifikasi identitas.
-- **Evaluasi QA & Training**: Manajemen jadwal pelatihan dan penilaian kelayakan personil oleh tim QA.
-- **Penerbitan Sertifikat Otomatis**: Pembuatan sertifikat kompetensi berbasis template docx secara instan bagi personil yang lulus evaluasi.
-- **Dashboard Eksekutif**: Ringkasan statistik pendaftaran dan status onboarding secara real-time.
+- **Manajemen Request For Partner (RFP)**: Alur pembuatan permintaan kebutuhan personil yang terstruktur berdasarkan area dan kualifikasi.
+- **Ekspor Excel Premium**: Fitur ekspor data tim per penugasan yang mendukung penyisipan **Foto KTP dan Foto Selfie** secara langsung ke dalam baris Excel menggunakan `exceljs`.
+- **Mesin Sertifikat PDF (Puppeteer)**: Penerbitan sertifikat kompetensi berbasis PDF yang dirender secara presisi menggunakan mesin Chromium, lengkap dengan QR Code validasi.
+- **Smart Credential Issuance**: Logika penerbitan akses (Email & Password) yang cerdas; mencegah duplikasi file sertifikat saat pembaruan kredensial dilakukan.
+- **Standarisasi UI/UX Modern**: Antarmuka premium dengan sistem *badge* bergaya *rounded-pill* dan tombol aksi berbasis ikon SVG yang seragam di seluruh modul.
+- **Dashboard Real-Time Berbasis Role**: 
+  - **Internal Alita**: Prioritas tampilan permintaan dan mitra aktif.
+  - **Partner**: Prioritas tampilan personil tersertifikasi.
+  - **Akurasi Data**: Seluruh statistik secara otomatis memfilter hanya anggota tim yang berstatus aktif.
 
 ## 🛠️ Tumpukan Teknologi
 
-- **Framework**: [Next.js 15+](https://nextjs.org/) (App Router & Turbopack)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Framework**: [Next.js 16.2.3](https://nextjs.org/) (App Router & Turbopack)
+- **Styling**: [Tailwind CSS 4.0](https://tailwindcss.com/)
+- **Frontend**: [React 19](https://react.dev/)
 - **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
 - **Database**: [MySQL](https://www.mysql.com/)
 - **Autentikasi**: [NextAuth.js](https://next-auth.js.org/)
-- **Bahasa**: [TypeScript](https://www.typescriptlang.org/)
+- **PDF Engine**: [Puppeteer](https://pptr.dev/)
+- **Excel Engine**: [ExcelJS](https://github.com/exceljs/exceljs)
 
 ## 📦 Panduan Instalasi
 
 ### 1. Prasyarat
 Pastikan Anda telah menginstal:
-- Node.js v18.x atau lebih baru
-- MySQL Server (versi 8.0 direkomendasikan)
+- Node.js v18.x atau lebih baru (v20+ direkomendasikan)
+- MySQL Server 8.0+
 - npm atau yarn
 
-### 2. Kloning Repositori
+### 2. Kloning & Instalasi
 ```bash
 git clone https://github.com/itappsalita/Partner-Team-Onboarding.git
 cd Partner-Team-Onboarding
-```
-
-### 3. Instalasi Dependensi
-```bash
 npm install
 ```
 
-### 4. Konfigurasi Variabel Lingkungan
-Buat file bernama `.env` di direktori root dan sesuaikan konfigurasinya:
+### 3. Konfigurasi
+Lengkapi file `.env` di direktori root:
 ```env
 DATABASE_URL='mysql://user:password@localhost:3306/db_onboarding'
 NEXTAUTH_URL='http://localhost:3000'
-NEXTAUTH_SECRET='buat-kunci-acak-anda-disini'
+NEXTAUTH_SECRET='kunci-keamanan-anda'
 ```
 
-### 5. Setup Database
-Sinkronkan skema database menggunakan Drizzle:
+### 🐳 Deployment Produksi (Docker)
+
+Aplikasi ini telah dioptimalkan untuk berjalan di dalam kontainer Docker dengan dukungan penuh untuk rendering sertifikat PDF.
+
+### 1. Persiapan Environment
+Pastikan variabel lingkungan pada `docker-compose.yml` telah sesuai, terutama `NEXTAUTH_SECRET` dan `DATABASE_URL`.
+
+### 2. Build & Run
+Gunakan perintah berikut untuk membangun dan menjalankan seluruh layanan (Aplikasi & Database):
 ```bash
-npx drizzle-kit push
+docker compose up -d --build
 ```
 
-### 6. Menjalankan Aplikasi
-```bash
-npm run dev
-```
-Buka [http://localhost:3000](http://localhost:3000) pada browser Anda.
+### 3. Manajemen Data (Persistensi)
+Sangat penting untuk memastikan data unggahan personil tidak hilang. Konfigurasi volume berikut sudah terpasang secara default:
+- **Media**: `./public/uploads` di-mount ke kontainer untuk menyimpan KTP, Selfie, dan Sertifikat.
+- **Database**: `mysql_data` dikelola oleh Docker untuk menyimpan data relasional secara persisten.
 
-## 🐳 Deployment dengan Docker (Produksi)
+### 4. Optimalisasi Performa
+`Dockerfile` menggunakan metode **Multi-stage Build** dan **Standalone Output** dari Next.js untuk menghasilkan *image* yang ringan dan efisien untuk produksi.
 
-Aplikasi ini sudah dioptimalkan untuk berjalan di dalam kontainer menggunakan Docker.
+## ⚠️ Catatan Operasional & Arsitektur
 
-1.  **Build & Run**:
-    ```bash
-    docker compose up -d --build
-    ```
-2.  **Detail Operasional**: Silakan baca panduan lengkap di [docs/docker-guide.md](./docs/docker-guide.md) untuk informasi mengenai manejemen variabel lingkungan, volume data, dan sinkronisasi database.
-
-## ⚠️ Catatan Penting
-
-- **Arsitektur Identitas**: Aplikasi ini menggunakan kombinasi **UUID v7** untuk kunci internal (mendukung performa indexing tinggi) dan **Display ID** (seperti `USR-00001`, `REQ-00001`) untuk navigasi pengguna yang human-readable.
-- **Penyimpanan Media**: Seluruh file yang diunggah (KTP, Selfie, Sertifikat) disimpan di direktori `public/uploads/`. Pastikan direktori ini memiliki izin tulis (*write permission*).
-- **Keamanan**: Password dienkripsi menggunakan `bcrypt` versi 10 putaran. Semua rute dilindungi oleh sesi autentikasi berdasarkan peran (*role-based access control*).
+- **Sinkronisasi Status Proaktif**: Sistem menggunakan fungsi *cascading recalculation* di level database utilitas. Setiap perubahan pada anggota tim atau detail tim akan secara otomatis memperbarui status di level penugasan (`ASG`) hingga request (`REQ`) utama.
+- **Veteran/Returning Personnel**: Sistem secara otomatis mendeteksi NIK yang pernah terdaftar (status `isActive=0`) untuk memulihkan data sertifikat dan kredensial lama, memfasilitasi penugasan ulang yang cepat.
+- **Penyimpanan Media**: Dokumen teknis dan foto personil disimpan di `/public/uploads/`. Pastikan folder ini memiliki izin akses yang tepat pada lingkungan produksi.
 
 ---
-© 2026 PT. Alita Praya Mitra. Developed for internal onboarding efficiency.
+© 2026 PT. Alita Praya Mitra. Developed with Focus on Efficiency & UX Excellence.

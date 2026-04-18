@@ -7,6 +7,7 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { eq, and } from "drizzle-orm";
 import { generateUuid } from "../../../../lib/uuid";
+import { recalculateRequestStatus } from "../../../../db/status-utils";
 
 import fs from "fs-extra";
 
@@ -219,6 +220,15 @@ export async function PUT(req: Request) {
     await db.update(teams)
       .set(updateData)
       .where(eq(teams.id, id));
+
+    // PROACTIVE SYNC: Ensure dashboard is recalculated after team update
+    const team = await db.query.teams.findFirst({
+      where: eq(teams.id, id),
+      with: { dataTeamPartner: true }
+    });
+    if (team) {
+      await recalculateRequestStatus(db, team.dataTeamPartner.requestId);
+    }
 
     return NextResponse.json({ message: "Team updated successfully" });
   } catch (error: any) {
