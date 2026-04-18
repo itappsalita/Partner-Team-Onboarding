@@ -89,7 +89,7 @@ export async function POST(req: Request) {
       .from(trainingProcesses)
       .where(eq(trainingProcesses.id, trainingId));
     
-    const displayId = `TRN-${newTrn.seqNumber.toString().padStart(5, '0')}`;
+    const displayId = `TRN-${(newTrn?.seqNumber || 0).toString().padStart(5, '0')}`;
     
     await db.update(trainingProcesses)
       .set({ displayId })
