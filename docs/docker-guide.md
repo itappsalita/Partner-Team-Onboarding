@@ -1,44 +1,46 @@
 # Panduan Operasional Docker Produksi
 
-Panduan ini menjelaskan langkah-langkah detail untuk menjalankan aplikasi Anda di server produksi menggunakan infrastruktur Docker yang telah disiapkan.
+Panduan ini menjelaskan langkah-langkah detail untuk menjalankan aplikasi **Partner Team Onboarding** di server produksi menggunakan infrastruktur Docker yang telah dioptimalkan.
 
 ## 1. Persiapan Variabel Lingkungan
-Jangan mengandalkan file `.env` di dalam Docker untuk produksi. Sebagai gantinya, edit file `docker-compose.yml` pada bagian `environment` atau gunakan file external:
+Gunakan file `docker-compose.yml` untuk mengelola konfigurasi. Pastikan variabel berikut dikonfigurasi dengan benar sebelum deployment:
 
 ```yaml
 environment:
   - DATABASE_URL=mysql://root:password_asli_anda@db:3306/db_onboarding
-  - NEXTAUTH_URL=https://nama-domain-anda.com
-  - NEXTAUTH_SECRET=rahasia_sangat_panjang_dan_aman
+  - NEXTAUTH_URL=https://partner-onboarding.alita.id
+  - NEXTAUTH_SECRET=gunakan_string_acak_yang_sangat_panjang
 ```
+> [!NOTE]
+> Perhatikan bahwa `db` di dalam `DATABASE_URL` merujuk pada nama layanan database di dalam jaringan internal Docker, bukan `localhost`.
 
-## 2. Menjalankan Kontainer
-Gunakan perintah berikut untuk membangun dan menjalankan seluruh sistem:
+## 2. Pembangunan & Eksekusi
+Aplikasi ini menggunakan **Multi-stage Build** untuk meminimalisir ukuran image. Untuk membangun dan menjalankan:
 
 ```bash
 docker compose up -d --build
 ```
-- `-d`: Menjalankan di latar belakang (*detached mode*).
-- `--build`: Memastikan image dibangun ulang jika ada perubahan kode.
+- Image ini sudah menyertakan **Chromium & dependencies** sistem yang diperlukan agar fitur **Penerbitan Sertifikat PDF** berjalan lancar di dalam kontainer.
 
-## 3. Sinkronisasi Database (Penting!)
-Setelah kontainer database berjalan, Anda perlu melakukan sinkronisasi skema Drizzle. Jalankan perintah ini dari komputer lokal yang terhubung ke server (atau dari dalam kontainer):
+## 3. Persistensi Data (Sangat Penting)
+Aplikasi menyimpan file fisik yang krusial. Pastikan *volume* berikut tetap terpasang:
+
+1.  **mysql_data**: Menyimpan seluruh record database.
+2.  **./public/uploads**: Menyimpan dokumen fisik (**KTP, Selfie, dan Sertifikat PDF**). 
+    > [!IMPORTANT]
+    > Folder ini wajib di-backup secara rutin karena berisi dokumen legalitas personil.
+
+## 4. Sinkronisasi Database
+Setelah pertama kali dijalankan, lakukan sinkronisasi skema database dari mesin lokal yang memiliki akses ke server:
 
 ```bash
-# Jika menjalankan dari host yang memiliki akses ke DB Docker
 npx drizzle-kit push
 ```
 
-## 4. Persistensi Data (Volumes)
-Dua hal paling penting untuk di-backup secara rutin:
-1.  **mysql_data**: Volume ini berisi seluruh data database. Secara default disimpan di folder internal Docker.
-2.  **./public/uploads**: Folder ini berisi file-file fisik (KTP, Selfie). Folder ini dipetakan langsung ke folder di server Anda agar tidak hilang saat kontainer dihapus/diupdate.
-
-## 5. Pemeliharaan
-- **Melihat Log**: `docker compose logs -f app`
-- **Menghentikan Sistem**: `docker compose down`
-- **Update Kode**: `git pull` -> `docker compose up -d --build`
+## 5. Troubleshooting & Log
+- **Cek Status**: `docker compose ps`
+- **Melihat Log Real-time**: `docker compose logs -f app`
+- **Reputasi Puppeteer**: Jika sertifikat gagal dibuat, pastikan kontainer memiliki akses ke memory yang cukup (minimal 1GB RAM disarankan untuk Chromium).
 
 ---
-> [!CAUTION]
-> **Keamanan Password**: Jangan biarkan `MYSQL_ROOT_PASSWORD` tetap `rootpassword`. Ubah menjadi password yang kuat sebelum dideploy ke server yang terhubung internet.
+© 2026 PT. Alita Praya Mitra. Produksi-Ready Infrastructure.
