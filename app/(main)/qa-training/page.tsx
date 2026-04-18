@@ -314,7 +314,7 @@ export default function QaTrainingPage() {
                 currentItems.map((item) => (
                   <tr key={item.id} className="hover:bg-orange-50/30 transition-all duration-200 table-row-hover">
                     <td className="px-6 py-5">
-                      <div className="text-sm font-black text-alita-black tracking-tight">
+                      <div className="text-sm font-bold text-alita-gray-400 tracking-tight">
                         #{item.displayId}
                       </div>
                     </td>
