@@ -26,6 +26,27 @@ const saveFile = async (file: File | null, prefix: string) => {
   return `/uploads/${filename}`;
 };
 
+/**
+ * @swagger
+ * /api/data-team/teams:
+ *   get:
+ *     summary: Fetch all teams for a specific assignment
+ *     description: Retrieves a list of teams associated with a dataTeamPartnerId. Includes member data.
+ *     tags: [Teams]
+ *     parameters:
+ *       - in: query
+ *         name: dataTeamPartnerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: A list of teams with their members.
+ *       400:
+ *         description: Missing dataTeamPartnerId.
+ *       403:
+ *         description: Forbidden. Accessing data belonging to another partner.
+ */
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -64,6 +85,40 @@ export async function GET(req: Request) {
   }
 }
 
+/**
+ * @swagger
+ * /api/data-team/teams:
+ *   post:
+ *     summary: Add a new team to an assignment
+ *     description: Creates a new team entry with leadership and certification data. Validates against the assignment's quota.
+ *     tags: [Teams]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               dataTeamPartnerId:
+ *                 type: string
+ *               teamNumber:
+ *                 type: string
+ *               leaderName:
+ *                 type: string
+ *               leaderPhone:
+ *                 type: string
+ *               tkpk1Number:
+ *                 type: string
+ *               tkpk1File:
+ *                 type: string
+ *                 format: binary
+ *               position:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Team added successfully.
+ *       400:
+ *         description: Missing fields or quota reached.
+ */
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -172,6 +227,34 @@ export async function POST(req: Request) {
   }
 }
 
+/**
+ * @swagger
+ * /api/data-team/teams:
+ *   put:
+ *     summary: Update team technical details
+ *     description: Updates certification numbers, files, and leadership info for a team. Triggers a proactive dashboard status recalculation.
+ *     tags: [Teams]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *               leaderName:
+ *                 type: string
+ *               tkpk1Number:
+ *                 type: string
+ *               tkpk1File:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Team updated successfully.
+ *       400:
+ *         description: Missing ID or required fields.
+ */
 export async function PUT(req: Request) {
   try {
     const session = await getServerSession(authOptions);

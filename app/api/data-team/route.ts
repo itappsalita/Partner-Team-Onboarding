@@ -11,6 +11,19 @@ import { generateUuid } from "@/lib/uuid";
 
 const UPLOAD_DIR = join(process.cwd(), "public/uploads");
 
+/**
+ * @swagger
+ * /api/data-team:
+ *   get:
+ *     summary: Fetch all partner assignments
+ *     description: Retrieves a list of Request-to-Partner assignments. Partners will only see their own assignments.
+ *     tags: [Assignments]
+ *     responses:
+ *       200:
+ *         description: A list of assignments with related partner and request info.
+ *       401:
+ *         description: Unauthorized. Session required.
+ */
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -46,6 +59,39 @@ export async function GET(req: Request) {
   }
 }
 
+/**
+ * @swagger
+ * /api/data-team:
+ *   post:
+ *     summary: Create a new partner assignment (Placement)
+ *     description: Assigns a Partner to a specific Request and creates team placeholders. Restricted to PROCUREMENT and SUPERADMIN roles.
+ *     tags: [Assignments]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               requestId:
+ *                 type: string
+ *               partnerId:
+ *                 type: string
+ *               numTeams:
+ *                 type: string
+ *               torFile:
+ *                 type: string
+ *                 format: binary
+ *               bakFile:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: Assignment and team placeholders created successfully.
+ *       400:
+ *         description: Missing fields or quota exceeded.
+ *       403:
+ *         description: Forbidden. Insufficient permissions.
+ */
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);

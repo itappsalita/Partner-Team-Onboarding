@@ -27,6 +27,15 @@ const REQUEST_STATUS_MAPPING: Record<number, any> = {
  * Recalculates the status of a specific Team based on quota and leader existence.
  * Returns the new status string.
  */
+/**
+ * Recalculates the status of a specific Team based on the certification status 
+ * of its members. Updates the team status to COMPLETED only when all members 
+ * have issued certificates.
+ * 
+ * @param {any} tx - The Drizzle transaction object or database instance.
+ * @param {string} teamId - The ID of the team to recalculate.
+ * @returns {Promise<void>}
+ */
 export async function recalculateTeamStatus(tx: any, teamId: string) {
   // 1. Get the team and its request configuration
   const team = await tx.query.teams.findFirst({
@@ -67,6 +76,14 @@ export async function recalculateTeamStatus(tx: any, teamId: string) {
 /**
  * Recalculates the status of a Partner Assignment (dataTeamPartners) 
  * based on its children teams.
+ */
+/**
+ * Recalculates the status of a specific Partner Assignment (dataTeamPartner).
+ * Aggregates the statuses of all teams under this assignment.
+ * 
+ * @param {any} tx - The Drizzle transaction object or database instance.
+ * @param {string} assignmentId - The ID of the data_team_partner record.
+ * @returns {Promise<void>}
  */
 export async function recalculateAssignmentStatus(tx: any, assignmentId: string) {
   const assignment = await tx.query.dataTeamPartners.findFirst({
@@ -130,6 +147,17 @@ export async function recalculateAssignmentStatus(tx: any, assignmentId: string)
 /**
  * Recalculates the status of a Request For Partner based on the 
  * "worst-case" status among all required teams.
+ */
+/**
+ * Recalculates the overarching status of a Request based on its partner assignments.
+ * Implements a 'worst-case' logic hierarchy where the lowest status in the chain 
+ * determines the overall request status.
+ * 
+ * Hierarchy: SOURCING > ON_TRAINING > PARTIAL > COMPLETED
+ * 
+ * @param {any} tx - The Drizzle transaction object or database instance.
+ * @param {string} requestId - The ID of the request to recalculate.
+ * @returns {Promise<void>}
  */
 export async function recalculateRequestStatus(tx: any, requestId: string) {
   // 1. Get the Request Quota and Current Status

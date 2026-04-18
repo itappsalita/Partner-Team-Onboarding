@@ -10,6 +10,25 @@ import { join } from "path";
 
 const UPLOAD_DIR = join(process.cwd(), "public/uploads");
 
+/**
+ * @swagger
+ * /api/data-team/members/{id}:
+ *   delete:
+ *     summary: Remove or deactivate a team member
+ *     description: Permanently deletes uncertified members or deactivates (soft-delete) certified ones. Automatically downgrades the team and assignment status.
+ *     tags: [Members]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Member processed and status synchronized successfully.
+ *       404:
+ *         description: Member not found.
+ */
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
@@ -65,6 +84,38 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   }
 }
 
+/**
+ * @swagger
+ * /api/data-team/members/{id}:
+ *   put:
+ *     summary: Update member personnel info
+ *     description: Updates position and selfie photo. Restricted to teams in SOURCING status. Changes to 'Leader' position will sync with the Teams table.
+ *     tags: [Members]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               position:
+ *                 type: string
+ *               selfieFile:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Member updated successfully.
+ *       400:
+ *         description: Data locked (Team status is not SOURCING).
+ *       404:
+ *         description: Member not found or inactive.
+ */
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);

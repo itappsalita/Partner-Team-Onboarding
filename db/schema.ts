@@ -14,6 +14,10 @@ export const trainingResultEnum = ['PENDING', 'LULUS', 'TIDAK_LULUS'] as const;
 
 // --- TABLES ---
 
+/**
+ * USERS TABLE
+ * Stores account information for all roles (Admin, Partner, PMO, QA, etc.)
+ */
 export const users = mysqlTable('users', {
   id: uuidVarchar('id').primaryKey(),
   seqNumber: int('seq_number').autoincrement().unique(),
@@ -27,6 +31,10 @@ export const users = mysqlTable('users', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+/**
+ * REQUESTS FOR PARTNER (RFP)
+ * Main entity representing a procurement request for personnel from PMO Ops.
+ */
 export const requestForPartners = mysqlTable('request_for_partners', {
   id: uuidVarchar('id').primaryKey(),
   seqNumber: int('seq_number').autoincrement().unique(),
@@ -42,6 +50,10 @@ export const requestForPartners = mysqlTable('request_for_partners', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+/**
+ * DATA TEAM PARTNERS (Assignments)
+ * Junction table mapping specific Partners to a Request with defined quotas.
+ */
 export const dataTeamPartners = mysqlTable('data_team_partners', {
   id: uuidVarchar('id').primaryKey(),
   seqNumber: int('seq_number').autoincrement().unique(),
@@ -56,6 +68,10 @@ export const dataTeamPartners = mysqlTable('data_team_partners', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+/**
+ * TEAMS
+ * Groups of personnel under a specific assignment.
+ */
 export const teams = mysqlTable('teams', {
   id: uuidVarchar('id').primaryKey(),
   seqNumber: int('seq_number').autoincrement().unique(),
@@ -76,6 +92,10 @@ export const teams = mysqlTable('teams', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+/**
+ * TEAM MEMBERS
+ * Individual personnel data, including NIK, photos, and certificate status.
+ */
 export const teamMembers = mysqlTable('team_members', {
   id: uuidVarchar('id').primaryKey(),
   seqNumber: int('seq_number').autoincrement().unique(),
@@ -98,6 +118,10 @@ export const teamMembers = mysqlTable('team_members', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+/**
+ * TRAINING PROCESSES
+ * Tracks scheduling and results of QA evaluations for each team.
+ */
 export const trainingProcesses = mysqlTable('training_processes', {
   id: uuidVarchar('id').primaryKey(),
   seqNumber: int('seq_number').autoincrement().unique(),

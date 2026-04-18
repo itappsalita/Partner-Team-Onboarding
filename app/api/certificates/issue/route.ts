@@ -8,6 +8,34 @@ import path from "path";
 import fs from "fs-extra";
 import { generateCertificatePdf } from "./certUtils";
 
+/**
+ * @swagger
+ * /api/certificates/issue:
+ *   put:
+ *     summary: Issue certificate and external credentials
+ *     description: Generates a PDF certificate for a member (via Puppeteer) and assigns Alita email credentials. Automatically triggers team and request status synchronization.
+ *     tags: [Certificates]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [memberId, alitaExtEmail]
+ *             properties:
+ *               memberId:
+ *                 type: string
+ *               alitaExtEmail:
+ *                 type: string
+ *               alitaEmailPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Certificate generated and credentials issued successfully.
+ *       400:
+ *         description: Missing required fields.
+ *       404:
+ *         description: Member not found.
+ */
 export async function PUT(req: Request) {
   try {
     const { memberId, alitaExtEmail, alitaEmailPassword } = await req.json();

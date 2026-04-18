@@ -11,6 +11,25 @@ import { recalculateTeamStatus, recalculateAssignmentStatus, recalculateRequestS
 
 const UPLOAD_DIR = join(process.cwd(), "public/uploads");
 
+/**
+ * @swagger
+ * /api/data-team/members:
+ *   get:
+ *     summary: Fetch all members in a team
+ *     description: Retrieves the list of personnel assigned to a specific teamId. Partners are restricted to their own teams.
+ *     tags: [Members]
+ *     parameters:
+ *       - in: query
+ *         name: teamId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: A list of team members.
+ *       400:
+ *         description: Missing teamId.
+ */
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -44,6 +63,43 @@ export async function GET(req: Request) {
   }
 }
 
+/**
+ * @swagger
+ * /api/data-team/members:
+ *   post:
+ *     summary: Register a new team member
+ *     description: Registers personnel, performs NIK validation, handles KTP/Selfie uploads, and automatically detects if the member is a certified veteran (Returning Member).
+ *     tags: [Members]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               teamId:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               nik:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               position:
+ *                 type: string
+ *               ktpFile:
+ *                 type: string
+ *                 format: binary
+ *               selfieFile:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: Member added successfully (new or returning).
+ *       400:
+ *         description: Missing fields, NIK already active, or quota full.
+ *       403:
+ *         description: Forbidden. Accessing another partner's team.
+ */
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);

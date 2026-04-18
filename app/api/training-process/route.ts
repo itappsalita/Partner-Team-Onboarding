@@ -4,7 +4,19 @@ import { trainingProcesses } from "../../../db/schema";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { generateUuid } from "../../../lib/uuid";
+import { eq } from "drizzle-orm";
 
+/**
+ * @swagger
+ * /api/training-process:
+ *   get:
+ *     summary: Fetch all training records
+ *     description: Retrieves the complete history of team evaluations and training statuses.
+ *     tags: [Training]
+ *     responses:
+ *       200:
+ *         description: A list of training process records.
+ */
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -18,6 +30,36 @@ export async function GET(req: Request) {
   }
 }
 
+/**
+ * @swagger
+ * /api/training-process:
+ *   post:
+ *     summary: Record team training results
+ *     description: Submits evaluation data for a team. Restricted to QA role.
+ *     tags: [Training]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [teamId]
+ *             properties:
+ *               teamId:
+ *                 type: string
+ *               trainingDate:
+ *                 type: string
+ *                 format: date-time
+ *               result:
+ *                 type: string
+ *                 enum: [PENDING, LULUS, TIDAK_LULUS]
+ *               whatsappGroupJustification:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Training record updated successfully.
+ *       403:
+ *         description: Forbidden. QA only.
+ */
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);

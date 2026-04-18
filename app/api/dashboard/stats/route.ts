@@ -5,6 +5,40 @@ import { count, eq, and, isNotNull, isNull, ne, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 
+/**
+ * @swagger
+ * /api/dashboard/stats:
+ *   get:
+ *     summary: Fetch dashboard KPI statistics
+ *     description: Retrieves aggregated metrics for the dashboard. Admins see global data, while Partners see data filtered for their own company.
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Dashboard statistics including KPIs, pipeline stages, and province distribution.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 partners: { type: number }
+ *                 certifiedMembers: { type: number }
+ *                 teams: { type: number }
+ *                 members: { type: number }
+ *                 pipelineData:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name: { type: string }
+ *                       value: { type: number }
+ *                 provinceData:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name: { type: string }
+ *                       demand: { type: number }
+ */
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);

@@ -1,6 +1,11 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
+/**
+ * AUTHENTICATION & ROLE-BASED ACCESS CONTROL MIDDLEWARE
+ * Proteksi rute menggunakan NextAuth. Menentukan siapa yang boleh mengakses 
+ * halaman tertentu berdasarkan peran (Role) yang disimpan dalam JWT token.
+ */
 export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
