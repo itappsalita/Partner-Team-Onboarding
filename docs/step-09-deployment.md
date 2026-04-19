@@ -1,6 +1,6 @@
 # Tutorial Deployment: Automated CI/CD & Multi-Environment 🚀
 
-Panduan ini dirancang untuk mendampingi Anda dari nol hingga memiliki sistem deployment otomatis yang profesional menggunakan **GitHub Actions** ke dua lingkungan terpisah (**Dev** dan **Prod**) di dua VM yang berbeda.
+Panduan ini dirancang untuk mendahului Anda dari nol hingga memiliki sistem deployment otomatis yang profesional menggunakan **GitHub Actions** ke dua lingkungan terpisah (**Dev** dan **Prod**) di dua VM yang berbeda.
 
 ---
 
@@ -37,26 +37,26 @@ Sangat disarankan untuk mengikuti spesifikasi berikut agar proses berat seperti 
 Langkah-langkah berikut adalah **setup awal (sekali saja)** yang dilakukan pada **KEDUA VM** (Dev dan Prod) agar server siap menerima kode aplikasi.
 
 ### 1. Masuk ke Dalam Server (SSH Access)
-**Tujuan**: Memberikan Anda akses kendali jarak jauh ke "komputer" server dari laptop Anda.
-Buka terminal dan masuk menggunakan SSH:
+**Tujuan**: Memberikan Anda akses kendali jarak jauh ke server.
+Buka terminal laptop Anda dan masuk menggunakan SSH:
 ```bash
 ssh root@[IP_SERVER_ANDA]
 ```
-Jalankan pembaruan sistem keamanan untuk memastikan server memiliki *patch* terbaru:
+Jalankan pembaruan sistem keamanan:
 ```bash
 apt update && apt upgrade -y
 ```
 
 ### 2. Instalasi Docker (Mesin Aplikasi)
-**Tujuan**: Menginstal "mesin penggerak". Aplikasi ini dibungkus dalam kontainer Docker agar bisa berjalan di mana saja dengan stabil, tanpa perlu menginstal Node.js atau MySQL secara manual di server.
-Jalankan perintah otomatis ini untuk menginstal Docker Engine & Compose:
+**Tujuan**: Menginstal mesin penggerak kontainer agar aplikasi bisa berjalan stabil.
+Jalankan perintah otomatis ini:
 ```bash
 curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
 ```
 
 ### 3. Mengambil Kode Aplikasi (Git Synchronization)
-**Tujuan**: Membawa "isi" aplikasi (source code) dari GitHub ke dalam server. Folder yang dihasilkan akan menjadi lokasi utama di mana sistem otomatis (GitHub Actions) bekerja.
-Masuk ke direktori home dan kloning repositori:
+**Tujuan**: Menyiapkan folder proyek yang akan di-update otomatis oleh GitHub.
+Masuk ke direktori home server dan kloning repositori:
 ```bash
 cd ~
 git clone https://github.com/itappsalita/Partner-Team-Onboarding.git
@@ -65,45 +65,72 @@ cd Partner-Team-Onboarding
 
 ---
 
-## Bab 2: Konfigurasi Otomatisasi (CI/CD)
+## Bab 2: Konfigurasi Keamanan (SSH Keys)
 
-Ini adalah langkah krusial agar setiap ada perubahan kode, server otomatis ter-update tanpa perlu login manual.
+Setelah server siap, kita harus membuat "kunci" agar GitHub bisa masuk ke server secara otomatis tanpa menggunakan password.
 
-> [!IMPORTANT]
-> Sebelum melanjutkan, Anda **WAJIB** menyelesaikan konfigurasi di:
-> **[Step 00: Pre-Deployment & CICD Configuration](file:///Users/etikahsiregar/Development/Partner-Team-Onboarding/docs/step-00-pre-deployment-cicd.md)**.
-> Tanpa langkah tersebut, semua push ke GitHub tidak akan terkirim ke server.
+### 1. Membuat SSH Key Baru
+Lakukan perintah ini di **terminal laptop Anda**:
+```bash
+ssh-keygen -t ed25519 -C "github-actions-deploy"
+```
+- Tekan `Enter` untuk lokasi default.
+- Kosongkan passphrase (tekan `Enter` 2x) agar otomatisasi tidak terhambat.
 
-### 1. Daftarkan GitHub Secrets
-Buka repositori Anda di GitHub, lalu ke **Settings** -> **Secrets and variables** -> **Actions**. Tambahkan:
+**Hasil:**
+- Kunci Privat: `~/.ssh/id_ed25519`
+- Kunci Publik: `~/.ssh/id_ed25519.pub`
 
-- **Untuk Dev**:
-  * `DEV_SSH_HOST`: IP VM Dev.
-  * `DEV_SSH_USER`: Username (biasanya `root`).
-  * `DEV_SSH_KEY`: Private SSH Key Anda.
-- **Untuk Prod**:
-  * `PROD_SSH_HOST`: IP VM Prod.
-  * `PROD_SSH_USER`: Username.
-  * `PROD_SSH_KEY`: Private SSH Key.
-
-### 2. Pengaturan File Rahasia (.env)
-Buat file rahasia di masing-masing server secara manual untuk pertama kali:
-*   **Di VM Dev**: `nano .env.development`
-*   **Di VM Prod**: `nano .env.production`
-
-Isi sesuai dengan database dan URL masing-masing lingkungan.
+### 2. Mendaftarkan Kunci Publik ke Server
+Lakukan ini pada **kedua VM** (Dev & Prod):
+1. Salin isi kunci publik dari laptop Anda: `cat ~/.ssh/id_ed25519.pub`.
+2. Masuk ke server via SSH (Bab 1).
+3. Tempelkan kunci tersebut ke dalam file authorized keys server:
+   ```bash
+   mkdir -p ~/.ssh && nano ~/.ssh/authorized_keys
+   ```
+4. Simpan (`Ctrl+O`, `Enter`) dan Keluar (`Ctrl+X`).
 
 ---
 
-## Bab 3: Menjalankan Aplikasi
+## Bab 3: Konfigurasi GitHub Secrets
+
+Agar alur CI/CD di GitHub mengenali "kunci" dan "alamat" server Anda.
+
+1. Buka repositori GitHub Anda -> **Settings** -> **Secrets and variables** -> **Actions**.
+2. Klik **New repository secret** dan tambahkan variabel berikut:
+
+| Nama Secret | Isi / Nilai |
+| :--- | :--- |
+| `DEV_SSH_KEY` | Isi dengan Kunci Privat dari laptop Anda (`cat ~/.ssh/id_ed25519`). |
+| `DEV_SSH_HOST` | IP Publik VM Development. |
+| `DEV_SSH_USER` | `root` (atau username server Anda). |
+| `PROD_SSH_KEY` | Isi dengan Kunci Privat yang sama (atau beda). |
+| `PROD_SSH_HOST`| IP Publik VM Production. |
+| `PROD_SSH_USER`| `root`. |
+
+---
+
+## Bab 4: Pengaturan File Rahasia (.env)
+
+Buat file variabel lingkungan di masing-masing server secara manual untuk pertama kali agar aplikasi tahu URL dan database yang digunakan:
+
+*   **Di VM Dev**: `nano ~/Partner-Team-Onboarding/.env.development`
+*   **Di VM Prod**: `nano ~/Partner-Team-Onboarding/.env.production`
+
+*Isi file disesuaikan dengan domain dan password database masing-masing.*
+
+---
+
+## Bab 5: Menjalankan Deployment
 
 ### Opsi A: Jalur Otomatis (Rekomendasi)
-Cukup lakukan Push atau Merge ke branch yang sesuai:
+Cukup lakukan Push atau Merge ke branch yang sesuai dari laptop Anda:
 -   Push ke branch `develop` -> GitHub Actions akan men-deploy ke **VM Dev**.
 -   Push ke branch `main` -> GitHub Actions akan men-deploy ke **VM Prod**.
 
 ### Opsi B: Jalur Manual (Darurat)
-Jika terjadi kendala pada internet atau GitHub:
+Jika terjadi kendala pada GitHub, login ke server dan jalankan:
 ```bash
 # Di VM Dev
 docker compose -f docker-compose.dev.yml up -d --build
@@ -114,58 +141,42 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 ---
 
-## Bab 4: Konfigurasi Domain (Nginx)
+## Bab 6: Konfigurasi Domain & HTTPS (Nginx)
 
-Anda memiliki dua pilihan untuk mengatur domain agar bisa diakses via HTTPS (Gembok Hijau).
+### Opsi 1: Nginx Proxy Manager (GUI - Mudah)
+Jika Anda menggunakan tampilan visual:
+1.  Akses port `81` di browser IP server Anda.
+2.  Tambahkan **Proxy Host**:
+    -   Domain: `dev.partner-onboarding.alita.id` -> Forward ke Port: `3001`.
+    -   Domain: `partner-onboarding.alita.id` -> Forward ke Port: `3000`.
+3.  Aktifkan SSL (Let's Encrypt) di tab SSL.
 
-### Opsi 1: Nginx Proxy Manager (GUI - Sangat Mudah)
-Jika Anda lebih suka tampilan visual:
-1.  Buat folder: `mkdir ~/npm-proxy && cd ~/npm-proxy`.
-2.  Buat `docker-compose.yml` berisi image `jc21/nginx-proxy-manager`.
-3.  Akses port `81` di browser.
-4.  Tambahkan **Proxy Host**:
-    -   Domain: `dev.partner-onboarding.alita.id` -> Forward ke IP:Localhost Port: `3001`.
-    -   Domain: `partner-onboarding.alita.id` -> Forward ke IP:Localhost Port: `3000`.
-5.  Gunakan tab **SSL** untuk mengaktifkan "Request a New SSL Certificate".
-
-### Opsi 2: Nginx Manual (Teks - Lebih Stabil)
-Gunakan template konfigurasi yang tersedia di folder `nginx/conf.d/app.conf` pada proyek ini sebagai referensi untuk dipasang di `/etc/nginx/conf.d/` server Anda.
+### Opsi 2: Nginx Manual (Teks - Stabil)
+Gunakan template konfigurasi yang tersedia di folder `nginx/conf.d/app.conf` pada proyek ini sebagai referensi untuk dipasang di `/etc/nginx/conf.d/` server.
 
 ---
 
-## Bab 5: Finalisasi & Pemeliharaan Data
+## Bab 7: Pemeliharaan Data & Troubleshooting
 
 ### 1. Inisialisasi Database
-Saat pertama kali aplikasi berjalan, tata struktur database-nya:
+Saat pertama kali berjalan, sinkronkan struktur database:
 ```bash
-# Jalankan dari dalam folder proyek di server
 npx drizzle-kit push
 ```
 
-### 2. Persistensi Data (Sangat Penting)
-Pastikan folder berikut di-backup secara rutin karena menyimpan dokumen fisik:
--   `./public/uploads`: Foto KTP, Selfie, dan Sertifikat PDF.
--   Volume `mysql_data_dev` / `mysql_data_prod`: Seluruh data transaksi.
+### 2. Backup Rutin
+Wajib backup folder `./public/uploads` dan volume `mysql_data_dev/prod` karena berisi file fisik (KTP, Selfie, Sertifikat).
 
-### 3. Troubleshooting
-Gunakan perintah berikut jika aplikasi terasa lambat atau tidak bisa diakses:
+### 3. Log Error
 ```bash
-# Cek apakah container berjalan
-docker compose ps
-
-# Intip log error aplikasi
 docker compose logs -f app
-
-# Bersihkan image lama yang tidak terpakai (menghemat disk)
-docker image prune -f
 ```
 
 ---
 
-## Bab 6: Verifikasi Akhir
-Setelah semua jalan, pastikan akses portal dokumentasi API untuk memastikan backend sinkron:
+## Bab 8: Verifikasi Akhir
+Setelah semua jalan, pastikan akses portal dokumentasi API:
 -   URL: `https://[DOMAIN_ANDA]/api-docs`
--   Pastikan list API muncul dan bisa dicoba.
 
 ---
-© 2026 PT. Alita Praya Mitra. Developed for Success with Focus on Automation & Reliability.
+© 2026 PT. Alita Praya Mitra. Seluruh konfigurasi deployment telah siap dan otomatis.
