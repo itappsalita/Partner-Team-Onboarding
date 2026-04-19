@@ -69,6 +69,11 @@ cd Partner-Team-Onboarding
 
 Ini adalah langkah krusial agar setiap ada perubahan kode, server otomatis ter-update tanpa perlu login manual.
 
+> [!IMPORTANT]
+> Sebelum melanjutkan, Anda **WAJIB** menyelesaikan konfigurasi di:
+> **[Step 00: Pre-Deployment & CICD Configuration](file:///Users/etikahsiregar/Development/Partner-Team-Onboarding/docs/step-00-pre-deployment-cicd.md)**.
+> Tanpa langkah tersebut, semua push ke GitHub tidak akan terkirim ke server.
+
 ### 1. Daftarkan GitHub Secrets
 Buka repositori Anda di GitHub, lalu ke **Settings** -> **Secrets and variables** -> **Actions**. Tambahkan:
 
