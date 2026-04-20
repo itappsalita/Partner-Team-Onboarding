@@ -36,6 +36,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Install and setup OpenVPN
+        uses: jirutka/setup-openvpn@v3
+        with:
+          config: ${{ secrets.VPN_CONFIG }}
+
       - name: Deploy to Development VM
         uses: appleboy/ssh-action@master
         with:
@@ -55,6 +60,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Install and setup OpenVPN
+        uses: jirutka/setup-openvpn@v3
+        with:
+          config: ${{ secrets.VPN_CONFIG }}
 
       - name: Deploy to Production VM
         uses: appleboy/ssh-action@master

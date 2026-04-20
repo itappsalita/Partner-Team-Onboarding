@@ -102,11 +102,12 @@ Agar alur CI/CD di GitHub mengenali "kunci" dan "alamat" server Anda.
 
 | Nama Secret | Isi / Nilai |
 | :--- | :--- |
+| **`VPN_CONFIG`** | Isi seluruh teks dari file `.ovpn` Anda. |
 | `DEV_SSH_KEY` | Isi dengan Kunci Privat dari laptop Anda (`cat ~/.ssh/id_ed25519`). |
-| `DEV_SSH_HOST` | IP Publik VM Development. |
+| `DEV_SSH_HOST` | **IP Lokal** VM Development (misal: `10.0.x.x`). |
 | `DEV_SSH_USER` | `root` (atau username server Anda). |
 | `PROD_SSH_KEY` | Isi dengan Kunci Privat yang sama (atau beda). |
-| `PROD_SSH_HOST`| IP Publik VM Production. |
+| `PROD_SSH_HOST`| **IP Lokal** VM Production (misal: `10.0.x.x`). |
 | `PROD_SSH_USER`| `root`. |
 
 ---
