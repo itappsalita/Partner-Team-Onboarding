@@ -142,18 +142,60 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 ---
 
-## Bab 6: Konfigurasi Domain & HTTPS (Nginx)
+## Bab 6: Konfigurasi Domain & Wildcard SSL (Nginx)
 
-### Opsi 1: Nginx Proxy Manager (GUI - Mudah)
-Jika Anda menggunakan tampilan visual:
-1.  Akses port `81` di browser IP server Anda.
-2.  Tambahkan **Proxy Host**:
-    -   Domain: `dev.partner-onboarding.alita.id` -> Forward ke Port: `3001`.
-    -   Domain: `partner-onboarding.alita.id` -> Forward ke Port: `3000`.
-3.  Aktifkan SSL (Let's Encrypt) di tab SSL.
+Karena Anda memiliki sertifikat SSL Wildcard sendiri (`alita.id`), ikuti langkah berikut untuk memasangnya secara manual di server.
 
-### Opsi 2: Nginx Manual (Teks - Stabil)
-Gunakan template konfigurasi yang tersedia di folder `nginx/conf.d/app.conf` pada proyek ini sebagai referensi untuk dipasang di `/etc/nginx/conf.d/` server.
+### 1. Persiapan File Sertifikat
+Siapkan dua file sertifikat Anda (misal: `star_alita_id.crt` dan `star_alita_id.key`) dan upload ke server di folder khusus agar aman.
+```bash
+# Buat folder sertifikat di server
+mkdir -p /etc/nginx/ssl/alita
+# Upload atau copy file sertifikat ke sana
+# /etc/nginx/ssl/alita/star_alita_id.crt
+# /etc/nginx/ssl/alita/star_alita_id.key
+```
+
+### 2. Konfigurasi Nginx Manual (Teks - Direkomendasikan)
+Buat file konfigurasi di `/etc/nginx/conf.d/partner_onboarding.conf` dan gunakan template berikut:
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name partner-onboarding.alita.id dev.partner-onboarding.alita.id;
+
+    # SSL Configuration
+    ssl_certificate /etc/nginx/ssl/alita/star_alita_id.crt;
+    ssl_certificate_key /etc/nginx/ssl/alita/star_alita_id.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    location / {
+        # Jika akses domain utama, arahkan ke Prod (Port 3000)
+        # Jika akses domain dev, arahkan ke Dev (Port 3001)
+        # Gunakan variabel atau buat dua blok server jika ingin memisahkan port
+        proxy_pass http://localhost:3000; 
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+# Redirect HTTP to HTTPS
+server {
+    listen 80;
+    server_name partner-onboarding.alita.id dev.partner-onboarding.alita.id;
+    return 301 https://$host$request_uri;
+}
+```
+
+### 3. Implementasi via Nginx Proxy Manager (GUI)
+Jika Anda menggunakan Nginx Proxy Manager:
+1.  Klik menu **Custom SSL** -> **Add SSL Certificate**.
+2.  Upload file `.crt` dan `.key` wildcard Anda. Beri nama "Wildcard Alita".
+3.  Saat membuat **Proxy Host**, pilih sertifikat "Wildcard Alita" pada tab SSL.
 
 ---
 
