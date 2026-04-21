@@ -34,5 +34,23 @@ services:
       timeout: 5s
       retries: 5
 
+  # Management service for DB migrations and seeding
+  # This container is only run manually when needed
+  migration:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder # Use the builder stage which contains all devDependencies
+    container_name: onboarding-migration
+    env_file:
+      - .env.production
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./public/uploads:/app/public/uploads
+    profiles:
+      - migration # This ensures it doesn't start automatically with 'up'
+
 volumes:
   mysql_data_prod:

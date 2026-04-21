@@ -8,6 +8,8 @@ import dotenv from "dotenv";
 import path from "path";
 
 // Load environment variables
+dotenv.config({ path: path.resolve(process.cwd(), ".env.production") });
+dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 /**
