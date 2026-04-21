@@ -13,9 +13,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED 1
+# Dummy DATABASE_URL to satisfy build-time module checks
+ENV DATABASE_URL mysql://root:password@localhost:3306/db
 
 RUN npm run build
 
