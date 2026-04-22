@@ -16,10 +16,6 @@ services:
         condition: service_healthy
     volumes:
       - ./public/uploads:/app/public/uploads
-    command: >
-      sh -c "npm run db:generate &&
-             npm run db:migrate &&
-             node server.js"
 
   db:
     image: mysql:8.0
