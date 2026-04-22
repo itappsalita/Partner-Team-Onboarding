@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   app:
@@ -16,6 +16,10 @@ services:
         condition: service_healthy
     volumes:
       - ./public/uploads:/app/public/uploads
+    command: >
+      sh -c "npm run db:generate &&
+             npm run db:migrate &&
+             node server.js"
 
   db:
     image: mysql:8.0
@@ -29,7 +33,17 @@ services:
     volumes:
       - mysql_data_prod:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword_prod"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-ppassword_prod",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5

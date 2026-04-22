@@ -16,7 +16,10 @@ services:
         condition: service_healthy
     volumes:
       - ./public/uploads:/app/public/uploads
-
+    command: >
+      sh -c "npm run db:generate &&
+             npm run db:migrate &&
+             node server.js"
   db:
     image: mysql:8.0
     container_name: onboarding-db-dev
@@ -24,6 +27,7 @@ services:
     environment:
       - MYSQL_DATABASE=partner_onboarding_db
       - MYSQL_ROOT_PASSWORD=password_dev
+      - MYSQL_ROOT_HOST=%
     ports:
       - "3306:3306"
     volumes:
