@@ -320,13 +320,23 @@ export default function MemberWizard({
             </div>
 
             {memberForm.ktpFile && (
-              <div className="flex items-center gap-4 bg-alita-gray-50 border border-alita-gray-100 p-4 rounded-xl">
-                <div className="w-10 h-10 bg-alita-white rounded flex items-center justify-center text-lg border border-alita-gray-200 shadow-sm">📄</div>
-                <div className="flex-1 overflow-hidden">
-                  <div className="text-[11px] font-black text-alita-black truncate uppercase">{memberForm.ktpFile.name}</div>
-                  <div className="text-[9px] font-bold text-alita-gray-400 tracking-wider">FILE KTP TERUNGGAH</div>
+              <div className="border border-alita-gray-200 rounded-2xl overflow-hidden bg-alita-gray-50">
+                <div className="flex items-center justify-between px-4 py-2.5 border-b border-alita-gray-100">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-alita-gray-400">📎 File KTP Terunggah</span>
+                    <span className="text-[9px] font-bold text-alita-gray-300 truncate max-w-[160px]">{memberForm.ktpFile.name}</span>
+                  </div>
+                  <button type="button" onClick={() => setMemberStep(1)} className="text-[10px] font-black text-alita-orange hover:brightness-90 uppercase shrink-0">Ganti File</button>
                 </div>
-                <button type="button" onClick={() => setMemberStep(1)} className="text-[10px] font-black text-alita-orange hover:brightness-90 uppercase">Ganti File</button>
+                {ktpPreview && (
+                  <div className="p-3">
+                    <img
+                      src={ktpPreview}
+                      alt="Thumbnail KTP"
+                      className="w-full aspect-[1.58/1] object-contain rounded-xl border border-alita-gray-100 bg-alita-white shadow-sm"
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
