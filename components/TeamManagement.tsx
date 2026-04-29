@@ -43,6 +43,28 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
   // Member Edit State
   const [editingMember, setEditingMember] = useState<any>(null);
   const [editForm, setEditForm] = useState({ position: '', selfieFile: null as File | null });
+  const [exportingTeamId, setExportingTeamId] = useState<string | null>(null);
+
+  const handleExportTeam = async (team: any) => {
+    setExportingTeamId(team.id);
+    try {
+      const res = await fetch(`/api/data-team/export?id=${assignment.id}&teamId=${team.id}`);
+      if (!res.ok) throw new Error("Gagal mengunduh");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Tim_${team.displayId || team.teamNumber}_${new Date().toISOString().split("T")[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch {
+      alert("Terjadi kesalahan saat mengekspor data.");
+    } finally {
+      setExportingTeamId(null);
+    }
+  };
 
   const fetchTeams = async () => {
     setLoading(true);
@@ -333,12 +355,12 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
                       </button>
                     )}
                     {(userRole === 'PROCUREMENT' || userRole === 'SUPERADMIN') && (!activeTeam.status || activeTeam.status === 'SOURCING') && !isCanceled && (
-                      <button 
+                      <button
                         onClick={executeRequestTraining}
                         disabled={!isTeamValidToRequest || requesting === activeTeam.id}
                         title={!isTeamValidToRequest ? `Syarat: Tepat ${assignment.request?.membersPerTeam || 0} anggota aktif, minimal 1 Leader, dan Nomor TKPK1 terisi.` : ""}
                         className={`px-5 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 ${
-                          isTeamValidToRequest 
+                          isTeamValidToRequest
                             ? 'bg-alita-black text-alita-white hover:bg-alita-gray-800 cursor-pointer'
                             : 'bg-alita-gray-100 text-alita-gray-400 cursor-not-allowed opacity-70 border border-alita-gray-300'
                         }`}
@@ -349,6 +371,22 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
                           <>
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                             AJUKAN TRAINING
+                          </>
+                        )}
+                      </button>
+                    )}
+                    {!isPartner && (
+                      <button
+                        onClick={() => handleExportTeam(activeTeam)}
+                        disabled={exportingTeamId === activeTeam.id}
+                        className="px-4 py-2 bg-green-50 border border-green-200 text-green-700 rounded-lg hover:bg-green-100 transition-all shadow-sm active:scale-95 flex items-center gap-2 text-[11px] font-bold uppercase tracking-tight"
+                      >
+                        {exportingTeamId === activeTeam.id ? (
+                          <span className="animate-pulse italic">EXPORTING...</span>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Download Excel
                           </>
                         )}
                       </button>
