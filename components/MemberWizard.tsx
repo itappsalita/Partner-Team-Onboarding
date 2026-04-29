@@ -300,7 +300,7 @@ export default function MemberWizard({
             <div className="border-2 border-dashed border-alita-gray-200 rounded-2xl p-6 bg-alita-gray-50/50 hover:bg-alita-gray-100/50 transition-all relative group">
               <div className="flex flex-col items-center text-center">
                 {selfiePreview ? (
-                  <div className="relative w-24 h-24 mb-3">
+                  <div className="relative w-40 h-40 mb-3">
                     <img src={selfiePreview} alt="Selfie Preview" className="w-full h-full object-cover rounded-xl border-2 border-alita-orange shadow-md" />
                     <div className="absolute -top-2 -right-2 bg-alita-orange text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-lg">✓</div>
                   </div>
