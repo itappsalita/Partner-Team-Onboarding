@@ -108,6 +108,8 @@ export default function MembersPage() {
                 <th className="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">Nama & NIK</th>
                 <th className="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">Posisi</th>
                 <th className="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">No. HP</th>
+                <th className="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">No. Tim</th>
+                <th className="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">No. Assignment</th>
                 <th className="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">Tim / SOW</th>
                 <th className="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">Training</th>
                 <th className="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">Sertifikat</th>
@@ -117,14 +119,14 @@ export default function MembersPage() {
               {loading ? (
                 Array.from({ length: 8 }).map((_, i) => (
                   <tr key={i}>
-                    {Array.from({ length: 8 }).map((_, j) => (
+                    {Array.from({ length: 10 }).map((_, j) => (
                       <td key={j} className="px-5 py-4"><div className="skeleton h-4 w-full" /></td>
                     ))}
                   </tr>
                 ))
               ) : current.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-16 text-center">
+                  <td colSpan={10} className="px-6 py-16 text-center">
                     <svg className="w-12 h-12 text-alita-gray-200 mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                     <div className="text-sm font-bold text-alita-gray-400">Tidak ada anggota ditemukan</div>
                     <div className="text-xs text-alita-gray-300 mt-1">Coba ubah kata kunci pencarian</div>
@@ -168,6 +170,16 @@ export default function MembersPage() {
                       </span>
                     </td>
                     <td className="px-5 py-4 text-xs font-bold text-alita-black">{m.phone || "-"}</td>
+                    <td className="px-5 py-4">
+                      <span className="px-2.5 py-1 bg-alita-gray-50 border border-alita-gray-100 rounded-lg text-[10px] font-black text-alita-black whitespace-nowrap">
+                        #{m.team?.displayId || `Tim ${m.team?.teamNumber || "-"}`}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="px-2.5 py-1 bg-alita-gray-50 border border-alita-gray-100 rounded-lg text-[10px] font-black text-alita-black whitespace-nowrap">
+                        {m.team?.dataTeamPartner?.displayId || "-"}
+                      </span>
+                    </td>
                     <td className="px-5 py-4">
                       <div className="text-xs font-bold text-alita-black leading-tight mb-0.5 max-w-[180px] truncate" title={m.team?.dataTeamPartner?.request?.sowPekerjaan}>
                         {m.team?.dataTeamPartner?.request?.sowPekerjaan || "-"}
