@@ -321,12 +321,9 @@ export default function MemberWizard({
 
             {memberForm.ktpFile && (
               <div className="border border-alita-gray-200 rounded-2xl overflow-hidden bg-alita-gray-50">
-                <div className="flex items-center justify-between px-4 py-2.5 border-b border-alita-gray-100">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-alita-gray-400">📎 File KTP Terunggah</span>
-                    <span className="text-[9px] font-bold text-alita-gray-300 truncate max-w-[160px]">{memberForm.ktpFile.name}</span>
-                  </div>
-                  <button type="button" onClick={() => setMemberStep(1)} className="text-[10px] font-black text-alita-orange hover:brightness-90 uppercase shrink-0">Ganti File</button>
+                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-alita-gray-100">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-alita-gray-400">📎 File KTP Terunggah</span>
+                  <span className="text-[9px] font-bold text-alita-gray-300 truncate max-w-[200px]">{memberForm.ktpFile.name}</span>
                 </div>
                 {ktpPreview && (
                   <div className="p-3">
