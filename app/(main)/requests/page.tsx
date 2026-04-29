@@ -14,6 +14,8 @@ const PROVINSI_INDONESIA = [
   "Maluku", "Maluku Utara", "Papua Barat", "Papua", "Papua Tengah", "Papua Pegunungan", "Papua Selatan", "Papua Barat Daya"
 ];
 
+const SORTED_PROVINSI_INDONESIA = [...PROVINSI_INDONESIA].sort((a, b) => a.localeCompare(b, "id"));
+
 export default function RequestsPage() {
   const { data: session } = useSession();
   const userRole = (session?.user as any)?.role;
@@ -34,12 +36,14 @@ export default function RequestsPage() {
 
   // Form states
   const [formData, setFormData] = useState({
+    deskripsi: "",
     sowPekerjaan: "",
     provinsi: "",
     area: "",
     jumlahKebutuhan: "",
     membersPerTeam: "3", // Default to 3
-    siteId: ""
+    siteId: "",
+    dueDate: ""
   });
 
   const fetchRequests = async () => {
@@ -93,7 +97,7 @@ export default function RequestsPage() {
       });
       if (res.ok) {
         setIsModalOpen(false);
-        setFormData({ sowPekerjaan: "", provinsi: "", area: "", jumlahKebutuhan: "", membersPerTeam: "3", siteId: "" });
+        setFormData({deskripsi: "", sowPekerjaan: "", provinsi: "", area: "", jumlahKebutuhan: "", membersPerTeam: "3", siteId: "", dueDate: "" });
         fetchRequests();
       } else {
         const error = await res.json();
@@ -228,13 +232,13 @@ export default function RequestsPage() {
             <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-alita-gray-300 group-focus-within:text-alita-orange transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </div>
           <div className="relative group">
-            <select 
+            <select
               className="w-full pl-10 pr-4 py-3 bg-alita-white border border-alita-gray-100 rounded-xl text-xs font-bold focus:outline-none focus:border-alita-orange focus:ring-4 focus:ring-alita-orange-glow transition-all shadow-sm appearance-none"
               value={filterProvinsi}
               onChange={(e) => setFilterProvinsi(e.target.value)}
             >
               <option value="">Semua Provinsi</option>
-              {PROVINSI_INDONESIA.map(p => <option key={p} value={p}>{p}</option>)}
+              {SORTED_PROVINSI_INDONESIA.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
             <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-alita-gray-300 group-focus-within:text-alita-orange transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           </div>
@@ -256,17 +260,19 @@ export default function RequestsPage() {
 
       <div className="bg-alita-white rounded-2xl shadow-sm border border-alita-gray-100 overflow-hidden flex flex-col">
         <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-380px)]">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[1320px] text-left border-collapse">
             <thead className="sticky top-0 z-10 bg-alita-gray-50">
               <tr className="border-b border-alita-gray-100">
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">Nomor</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">SOW Pekerjaan</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">Deskripsi</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">Lokasi</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400 text-center">Quota</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400 text-center">Fulfillment</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">PMO Name</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">Status</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">Tanggal</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">Due Date</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">Created At</th>
                 {isPmo && <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-alita-gray-400">Aksi</th>}
               </tr>
             </thead>
@@ -276,17 +282,19 @@ export default function RequestsPage() {
                   <tr key={i}>
                     <td className="px-6 py-5"><div className="skeleton h-4 w-8" /></td>
                     <td className="px-6 py-5"><div className="skeleton h-4 w-40" /></td>
+                    <td className="px-6 py-5"><div className="skeleton h-4 w-44" /></td>
                     <td className="px-6 py-5"><div className="skeleton h-4 w-28" /></td>
                     <td className="px-6 py-5"><div className="skeleton h-4 w-10 mx-auto" /></td>
                     <td className="px-6 py-5"><div className="skeleton h-4 w-10 mx-auto" /></td>
                     <td className="px-6 py-5"><div className="skeleton h-4 w-24" /></td>
                     <td className="px-6 py-5"><div className="skeleton h-5 w-20 rounded-full" /></td>
                     <td className="px-6 py-5"><div className="skeleton h-4 w-20" /></td>
+                    <td className="px-6 py-5"><div className="skeleton h-4 w-20" /></td>
                     {isPmo && <td className="px-6 py-5" />}
                   </tr>
                 ))
               ) : currentItems.length === 0 ? (
-                <tr><td colSpan={isPmo ? 9 : 8} className="px-6 py-16 text-center">
+                <tr><td colSpan={isPmo ? 11 : 10} className="px-6 py-16 text-center">
                   <svg className="w-12 h-12 text-alita-gray-200 mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                   <div className="text-sm font-bold text-alita-gray-400">Tidak ada data request</div>
                   <div className="text-xs text-alita-gray-300 mt-1">Coba ubah filter atau buat request baru</div>
@@ -301,6 +309,14 @@ export default function RequestsPage() {
                         title={req.sowPekerjaan}
                       >
                         {req.sowPekerjaan}
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div
+                        className="text-sm font-bold text-alita-gray-600 tracking-tight max-w-[240px] truncate"
+                        title={req.deskripsi}
+                      >
+                        {req.deskripsi || "-"}
                       </div>
                     </td>
                     <td className="px-6 py-5">
@@ -326,6 +342,11 @@ export default function RequestsPage() {
                       <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border whitespace-nowrap ${getStatusClasses(req.status)}`}>
                         {getStatusLabel(req.status)}
                       </span>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="text-[10px] font-bold text-alita-gray-401 whitespace-nowrap">
+                        {mounted && req.dueDate ? new Date(req.dueDate).toLocaleDateString("id-ID", { day: '2-digit', month: 'short', year: 'numeric' }) : "-"}
+                      </div>
                     </td>
                     <td className="px-6 py-5">
                       <div className="text-[10px] font-bold text-alita-gray-401 whitespace-nowrap">
@@ -400,12 +421,28 @@ export default function RequestsPage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-alita-gray-500">SOW Pekerjaan</label>
+            <select
+              className="w-full px-4 py-3 bg-alita-gray-50 border border-alita-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-alita-orange focus:bg-alita-white focus:ring-4 focus:ring-alita-orange-glow transition-all"
+              value={formData.sowPekerjaan}
+              onChange={(e) => setFormData({...formData, sowPekerjaan: e.target.value})}
+              required
+            >
+              <option value="">Pilih SOW Pekerjaan</option>
+              <option value="Dismantle">Dismantle</option>
+              <option value="Newlink">Newlink</option>
+              <option value="Reroute">Reroute</option>
+              <option value="Swap upgrade">Swap upgrade</option>
+              <option value="Rewiring">Rewiring</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-alita-gray-500">Deskripsi</label>
             <textarea 
               className="w-full px-4 py-3 bg-alita-gray-50 border border-alita-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-alita-orange focus:bg-alita-white focus:ring-4 focus:ring-alita-orange-glow transition-all" 
               rows={3}
               placeholder="Jelaskan ruang lingkup pekerjaan..."
-              value={formData.sowPekerjaan}
-              onChange={(e) => setFormData({...formData, sowPekerjaan: e.target.value})}
+              value={formData.deskripsi}
+              onChange={(e) => setFormData({...formData, deskripsi: e.target.value})}
               required
             />
           </div>
@@ -420,7 +457,7 @@ export default function RequestsPage() {
                 required
               >
                 <option value="">Pilih Provinsi</option>
-                {PROVINSI_INDONESIA.map(p => <option key={p} value={p}>{p}</option>)}
+                {SORTED_PROVINSI_INDONESIA.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
             <div className="flex flex-col gap-1.5">
@@ -471,6 +508,16 @@ export default function RequestsPage() {
                 placeholder="Masukkan Project ID"
                 value={formData.siteId}
                 onChange={(e) => setFormData({...formData, siteId: e.target.value})}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-alita-gray-500">Due Date</label>
+              <input
+                type="date"
+                className="w-full px-4 py-3 bg-alita-gray-50 border border-alita-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-alita-orange focus:bg-alita-white focus:ring-4 focus:ring-alita-orange-glow transition-all"
+                value={formData.dueDate}
+                onChange={(e) => setFormData({...formData, dueDate: e.target.value})}
+                required
               />
             </div>
           </div>

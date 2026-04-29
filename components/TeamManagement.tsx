@@ -564,10 +564,10 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
                          <th className="px-5 py-4 text-left text-[10px] font-black uppercase tracking-widest text-alita-gray-400 border-b border-alita-gray-100">Nomor</th>
                          <th className="px-5 py-4 text-left text-[10px] font-black uppercase tracking-widest text-alita-gray-400 border-b border-alita-gray-100">Nama & NIK</th>
                          <th className="px-5 py-4 text-left text-[10px] font-black uppercase tracking-widest text-alita-gray-400 border-b border-alita-gray-100">Selfie</th>
+                         <th className="px-5 py-4 text-left text-[10px] font-black uppercase tracking-widest text-alita-gray-400 border-b border-alita-gray-100">KTP</th>
                          <th className="px-5 py-4 text-left text-[10px] font-black uppercase tracking-widest text-alita-gray-400 border-b border-alita-gray-100">Posisi</th>
                          <th className="px-5 py-4 text-left text-[10px] font-black uppercase tracking-widest text-alita-gray-400 border-b border-alita-gray-100">Training</th>
                          <th className="px-5 py-4 text-left text-[10px] font-black uppercase tracking-widest text-alita-gray-400 border-b border-alita-gray-100">Akses Sistem</th>
-                         <th className="px-5 py-4 text-left text-[10px] font-black uppercase tracking-widest text-alita-gray-400 border-b border-alita-gray-100">KTP</th>
                          {(!isCanceled && (isPartner || isSuperAdmin)) && (
                            <th className="px-5 py-4 text-center text-[10px] font-black uppercase tracking-widest text-alita-gray-400 border-b border-alita-gray-100">Action</th>
                          )}
@@ -610,6 +610,9 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
                                ) : (
                                  <span className="text-[10px] italic font-bold text-alita-gray-300 uppercase tracking-widest">No Photo</span>
                                )}
+                             </td>
+                             <td className="px-5 py-5">
+                               <a href={m.ktpFilePath} target="_blank" className="text-[11px] font-bold text-alita-orange hover:underline">Lihat File</a>
                              </td>
                              <td className="px-5 py-5">
                                 <span className="px-3 py-1 bg-alita-gray-50 rounded-full text-[9px] font-black uppercase text-alita-gray-501 border border-alita-gray-200 whitespace-nowrap">{m.position}</span>
@@ -665,9 +668,6 @@ export default function TeamManagement({ assignment, onClose }: TeamManagementPr
                                ) : (
                                  <span className="inline-flex items-center px-2 py-1 rounded-md bg-alita-gray-50 text-[9px] font-black text-alita-gray-300 uppercase tracking-widest border border-alita-gray-100 italic">Pending P&C</span>
                                )}
-                             </td>
-                             <td className="px-5 py-5">
-                               <a href={m.ktpFilePath} target="_blank" className="text-[11px] font-bold text-alita-orange hover:underline">Lihat File</a>
                              </td>
                            {(!isCanceled && (isPartner || isSuperAdmin)) && (
                              <td className="px-5 py-5 text-center">

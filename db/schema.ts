@@ -47,6 +47,8 @@ export const requestForPartners = mysqlTable('request_for_partners', {
   siteId: varchar('site_id', { length: 100 }),
   membersPerTeam: int('members_per_team').default(0).notNull(),
   status: mysqlEnum('status', requestStatusEnum).default('REQUESTED').notNull(),
+  deskripsi: text('deskripsi').notNull(),
+  dueDate: timestamp('due_date').defaultNow(),
   createdAt: timestamp('created_at').defaultNow(),
 });
 
